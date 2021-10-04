@@ -97,3 +97,13 @@ func (a Uint128) Lsh(i int) Uint128 {
 	}
 	return Uint128{h, a.L << i}
 }
+
+func (a Uint128) Rsh(i int) Uint128 {
+	l := a.L >> i
+	if i <= 64 {
+		l |= a.H << (64 - i)
+	} else {
+		l |= a.H >> (i - 64)
+	}
+	return Uint128{a.H >> i, l}
+}

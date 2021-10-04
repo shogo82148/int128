@@ -437,3 +437,54 @@ func TestUint64_Lsh(t *testing.T) {
 		}
 	}
 }
+
+func TestUint64_Rsh(t *testing.T) {
+	testCases := []struct {
+		a    Uint128
+		n    int
+		want Uint128
+	}{
+		{
+			Uint128{0, 0},
+			0,
+			Uint128{0, 0},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			1,
+			Uint128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			16,
+			Uint128{0xffff_ffff_ffff, 0xffff_0000_0000_0000},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			32,
+			Uint128{0xffff_ffff, 0xffff_ffff_0000_0000},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			64,
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			65,
+			Uint128{0, 0x7fff_ffff_ffff_ffff},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			128,
+			Uint128{0, 0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Rsh(tc.n)
+		if got != tc.want {
+			t.Errorf("%d: %v >> %d should %v, but %v", i, tc.a, tc.n, tc.want, got)
+		}
+	}
+}
