@@ -34,7 +34,7 @@ func (a Uint128) Div(b Uint128) Uint128 {
 		return Uint128{h, l}
 	}
 
-	n := bits.LeadingZeros64(b.H)
+	n := uint(bits.LeadingZeros64(b.H))
 	x := a.Rsh(1)
 	y := b.Lsh(n)
 	q, _ := bits.Div64(x.H, x.L, y.H)
@@ -94,7 +94,7 @@ func (a Uint128) Neg() Uint128 {
 	return Uint128{h, l}
 }
 
-func (a Uint128) Lsh(i int) Uint128 {
+func (a Uint128) Lsh(i uint) Uint128 {
 	if i < 64 {
 		return Uint128{a.H<<i | a.L>>(64-i), a.L << i}
 	} else {
@@ -102,7 +102,7 @@ func (a Uint128) Lsh(i int) Uint128 {
 	}
 }
 
-func (a Uint128) Rsh(i int) Uint128 {
+func (a Uint128) Rsh(i uint) Uint128 {
 	if i < 64 {
 		return Uint128{a.H >> i, a.H<<(64-i) | a.L>>i}
 	} else {

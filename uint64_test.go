@@ -419,7 +419,7 @@ func TestUint64_Neg(t *testing.T) {
 func TestUint64_Lsh(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
-		n    int
+		n    uint
 		want Uint128
 	}{
 		{
@@ -470,7 +470,7 @@ func TestUint64_Lsh(t *testing.T) {
 func TestUint64_Rsh(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
-		n    int
+		n    uint
 		want Uint128
 	}{
 		{
