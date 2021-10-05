@@ -548,7 +548,42 @@ func TestUint128_LeadingZeros(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.LeadingZeros()
 		if got != tc.want {
-			t.Errorf("%d: -%v should %v, but %v", i, tc.a, tc.want, got)
+			t.Errorf("%d: LeadingZeros of %v should %v, but %v", i, tc.a, tc.want, got)
+		}
+	}
+}
+
+func TestUint128_TrailingZeros(t *testing.T) {
+	testCases := []struct {
+		a    Uint128
+		want int
+	}{
+		{
+			Uint128{0, 0},
+			128,
+		},
+		{
+			Uint128{0xffff_ffff_0000_0000, 0},
+			96,
+		},
+		{
+			Uint128{1, 0},
+			64,
+		},
+		{
+			Uint128{0, 0xffff_ffff_0000_0000},
+			32,
+		},
+		{
+			Uint128{0, 1},
+			0,
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.TrailingZeros()
+		if got != tc.want {
+			t.Errorf("%d: TrailingZeros %v should %v, but %v", i, tc.a, tc.want, got)
 		}
 	}
 }

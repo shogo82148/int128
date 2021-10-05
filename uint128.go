@@ -116,3 +116,10 @@ func (a Uint128) LeadingZeros() int {
 	}
 	return bits.LeadingZeros64(a.H)
 }
+
+func (a Uint128) TrailingZeros() int {
+	if a.L == 0 {
+		return 64 + bits.TrailingZeros64(a.H)
+	}
+	return bits.TrailingZeros64(a.L)
+}
