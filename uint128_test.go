@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestUint64_Add(t *testing.T) {
+func TestUint128_Add(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
 	}{
@@ -61,7 +61,7 @@ func BenchmarkBigUint64_Add(b *testing.B) {
 	}
 }
 
-func TestUint64_Sub(t *testing.T) {
+func TestUint128_Sub(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
 	}{
@@ -106,7 +106,7 @@ func BenchmarkBigUint64_Sub(b *testing.B) {
 	}
 }
 
-func TestUint64_Mul(t *testing.T) {
+func TestUint128_Mul(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
 	}{
@@ -155,7 +155,7 @@ func TestUint64_Mul(t *testing.T) {
 	}
 }
 
-func TestUint64_Div(t *testing.T) {
+func TestUint128_Div(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
 	}{
@@ -184,7 +184,7 @@ func TestUint64_Div(t *testing.T) {
 	}
 }
 
-func TestUint64_Cmp(t *testing.T) {
+func TestUint128_Cmp(t *testing.T) {
 	testCases := []struct {
 		a, b Uint128
 		want int
@@ -224,7 +224,7 @@ func TestUint64_Cmp(t *testing.T) {
 	}
 }
 
-func TestUint64_And(t *testing.T) {
+func TestUint128_And(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
 	}{
@@ -258,7 +258,7 @@ func TestUint64_And(t *testing.T) {
 	}
 }
 
-func TestUint64_Or(t *testing.T) {
+func TestUint128_Or(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
 	}{
@@ -292,7 +292,7 @@ func TestUint64_Or(t *testing.T) {
 	}
 }
 
-func TestUint64_Xor(t *testing.T) {
+func TestUint128_Xor(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
 	}{
@@ -326,7 +326,7 @@ func TestUint64_Xor(t *testing.T) {
 	}
 }
 
-func TestUint64_AndNot(t *testing.T) {
+func TestUint128_AndNot(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
 	}{
@@ -360,7 +360,7 @@ func TestUint64_AndNot(t *testing.T) {
 	}
 }
 
-func TestUint64_Not(t *testing.T) {
+func TestUint128_Not(t *testing.T) {
 	testCases := []struct {
 		a, want Uint128
 	}{
@@ -390,7 +390,7 @@ func TestUint64_Not(t *testing.T) {
 	}
 }
 
-func TestUint64_Neg(t *testing.T) {
+func TestUint128_Neg(t *testing.T) {
 	testCases := []struct {
 		a, want Uint128
 	}{
@@ -416,7 +416,7 @@ func TestUint64_Neg(t *testing.T) {
 	}
 }
 
-func TestUint64_Lsh(t *testing.T) {
+func TestUint128_Lsh(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
 		n    uint
@@ -467,7 +467,7 @@ func TestUint64_Lsh(t *testing.T) {
 	}
 }
 
-func TestUint64_Rsh(t *testing.T) {
+func TestUint128_Rsh(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
 		n    uint
@@ -514,6 +514,41 @@ func TestUint64_Rsh(t *testing.T) {
 		got := tc.a.Rsh(tc.n)
 		if got != tc.want {
 			t.Errorf("%d: %v >> %d should %v, but %v", i, tc.a, tc.n, tc.want, got)
+		}
+	}
+}
+
+func TestUint128_LeadingZeros(t *testing.T) {
+	testCases := []struct {
+		a    Uint128
+		want int
+	}{
+		{
+			Uint128{0, 0},
+			128,
+		},
+		{
+			Uint128{0, 0xffff_ffff},
+			96,
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			64,
+		},
+		{
+			Uint128{0xffff_ffff, 0},
+			32,
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			0,
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.LeadingZeros()
+		if got != tc.want {
+			t.Errorf("%d: -%v should %v, but %v", i, tc.a, tc.want, got)
 		}
 	}
 }

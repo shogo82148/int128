@@ -109,3 +109,10 @@ func (a Uint128) Rsh(i uint) Uint128 {
 		return Uint128{0, a.H >> (i - 64)}
 	}
 }
+
+func (a Uint128) LeadingZeros() int {
+	if a.H == 0 {
+		return 64 + bits.LeadingZeros64(a.L)
+	}
+	return bits.LeadingZeros64(a.H)
+}
