@@ -95,21 +95,17 @@ func (a Uint128) Neg() Uint128 {
 }
 
 func (a Uint128) Lsh(i int) Uint128 {
-	h := a.H << i
-	if i <= 64 {
-		h |= a.L >> (64 - i)
+	if i < 64 {
+		return Uint128{a.H<<i | a.L>>(64-i), a.L << i}
 	} else {
-		h |= a.L << (i - 64)
+		return Uint128{a.L << (i - 64), 0}
 	}
-	return Uint128{h, a.L << i}
 }
 
 func (a Uint128) Rsh(i int) Uint128 {
-	l := a.L >> i
-	if i <= 64 {
-		l |= a.H << (64 - i)
+	if i < 64 {
+		return Uint128{a.H >> i, a.H<<(64-i) | a.L>>i}
 	} else {
-		l |= a.H >> (i - 64)
+		return Uint128{0, a.H >> (i - 64)}
 	}
-	return Uint128{a.H >> i, l}
 }
