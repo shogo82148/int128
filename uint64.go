@@ -34,16 +34,22 @@ func (a Uint128) Div(b Uint128) Uint128 {
 		return Uint128{h, l}
 	}
 
-	// the lower limit of the result
-	ret := a.H / (b.H + 1)
-
-	// TODO: fix me
-	h, l := bits.Mul64(b.L, ret)
-	h += b.H * ret
-	if h < a.H || (h == a.H && l <= b.L) {
-		return Uint128{0, ret}
+	n := bits.LeadingZeros64(b.H)
+	x := a.Rsh(1)
+	y := b.Lsh(n)
+	q, _ := bits.Div64(x.H, x.L, y.H)
+	q >>= 63 - n
+	if q > 0 {
+		q--
 	}
-	return Uint128{0, ret}
+
+	h, l := bits.Mul64(b.L, q)
+	h += b.H * q
+	r := a.Sub(Uint128{h, l})
+	if r.Cmp(b) >= 0 {
+		q++
+	}
+	return Uint128{0, q}
 }
 
 func (a Uint128) Cmp(b Uint128) int {
