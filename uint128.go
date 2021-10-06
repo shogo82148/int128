@@ -1,6 +1,8 @@
 package int128
 
-import "math/bits"
+import (
+	"math/bits"
+)
 
 type Uint128 struct {
 	H uint64
@@ -133,4 +135,59 @@ func (a Uint128) Len() int {
 
 func (a Uint128) OnesCount() int {
 	return bits.OnesCount64(a.H) + bits.OnesCount64(a.L)
+}
+
+const nSmalls = 100
+
+const smallsString = "00010203040506070809" +
+	"10111213141516171819" +
+	"20212223242526272829" +
+	"30313233343536373839" +
+	"40414243444546474849" +
+	"50515253545556575859" +
+	"60616263646566676869" +
+	"70717273747576777879" +
+	"80818283848586878889" +
+	"90919293949596979899"
+
+func small(n int) string {
+	if n < 10 {
+		return smallsString[n*2+1 : n*2+2]
+	}
+	return smallsString[n*2 : n*2+2]
+}
+
+func (a Uint128) String() string {
+	if a.H == 0 && a.L < nSmalls {
+		return small(int(a.L))
+	}
+
+	// 1e19 is available on uint64
+	// however the exponent should be even, because we handle twe digits at time.
+	const power10 = 1e18
+
+	var s [40]byte
+	i := len(s)
+
+	h, l := a.H, a.L
+	for h != 0 || l != 0 {
+		var r uint64
+		l, r = bits.Div64(h%power10, l, power10)
+		h = h / power10
+
+		for r > 0 {
+			is := (r % 100) * 2
+			i -= 2
+			r /= 100
+			s[i+1] = smallsString[is+1]
+			s[i+0] = smallsString[is+0]
+		}
+	}
+
+	// remove starting 0
+	for s[i] == '0' {
+		i++
+	}
+
+	return string(s[i:])
 }

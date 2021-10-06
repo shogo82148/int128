@@ -40,12 +40,12 @@ func TestUint128_Add(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Add(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v + %v should %v, but %v", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v + %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
 
-func BenchmarkUint64_Add(b *testing.B) {
+func BenchmarkUint128_Add(b *testing.B) {
 	x := Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
 	y := Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
 	for i := 0; i < b.N; i++ {
@@ -53,7 +53,7 @@ func BenchmarkUint64_Add(b *testing.B) {
 	}
 }
 
-func BenchmarkBigUint64_Add(b *testing.B) {
+func BenchmarkBigUint128_Add(b *testing.B) {
 	x, _ := new(big.Int).SetString("0x1234_5678_9abc_def0_1234_5678_9abc_def0", 0)
 	y, _ := new(big.Int).SetString("0x1234_5678_9abc_def0_1234_5678_9abc_def0", 0)
 	for i := 0; i < b.N; i++ {
@@ -85,12 +85,12 @@ func TestUint128_Sub(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Sub(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v - %v should %v, but %v", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v - %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
 
-func BenchmarkUint64_Sub(b *testing.B) {
+func BenchmarkUint128_Sub(b *testing.B) {
 	x := Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
 	y := Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
 	for i := 0; i < b.N; i++ {
@@ -98,7 +98,7 @@ func BenchmarkUint64_Sub(b *testing.B) {
 	}
 }
 
-func BenchmarkBigUint64_Sub(b *testing.B) {
+func BenchmarkBigUint128_Sub(b *testing.B) {
 	x, _ := new(big.Int).SetString("0x1234_5678_9abc_def0_1234_5678_9abc_def0", 0)
 	y, _ := new(big.Int).SetString("0x1234_5678_9abc_def0_1234_5678_9abc_def0", 0)
 	for i := 0; i < b.N; i++ {
@@ -150,7 +150,7 @@ func TestUint128_Mul(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Mul(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v * %v should %v, but %v", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v * %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
@@ -179,7 +179,7 @@ func TestUint128_Div(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Div(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v / %v should %v, but %v", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v / %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
@@ -219,7 +219,7 @@ func TestUint128_Cmp(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Cmp(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v * %v should %d, but %d", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v * %#v should %d, but %d", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
@@ -253,7 +253,7 @@ func TestUint128_And(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.And(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v & %v should %v, but %v", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v & %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
@@ -287,7 +287,7 @@ func TestUint128_Or(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Or(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v | %v should %v, but %v", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v | %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
@@ -321,7 +321,7 @@ func TestUint128_Xor(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Xor(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v ^ %v should %v, but %v", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v ^ %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
@@ -355,7 +355,7 @@ func TestUint128_AndNot(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.AndNot(tc.b)
 		if got != tc.want {
-			t.Errorf("%d: %v &^ %v should %v, but %v", i, tc.a, tc.b, tc.want, got)
+			t.Errorf("%d: %#v &^ %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
 	}
 }
@@ -385,7 +385,7 @@ func TestUint128_Not(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Not()
 		if got != tc.want {
-			t.Errorf("%d: ^%v should %v, but %v", i, tc.a, tc.want, got)
+			t.Errorf("%d: ^%#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
 	}
 }
@@ -411,7 +411,7 @@ func TestUint128_Neg(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Neg()
 		if got != tc.want {
-			t.Errorf("%d: -%v should %v, but %v", i, tc.a, tc.want, got)
+			t.Errorf("%d: -%#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
 	}
 }
@@ -462,7 +462,7 @@ func TestUint128_Lsh(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Lsh(tc.n)
 		if got != tc.want {
-			t.Errorf("%d: %v << %d should %v, but %v", i, tc.a, tc.n, tc.want, got)
+			t.Errorf("%d: %#v << %d should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
 		}
 	}
 }
@@ -513,7 +513,7 @@ func TestUint128_Rsh(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Rsh(tc.n)
 		if got != tc.want {
-			t.Errorf("%d: %v >> %d should %v, but %v", i, tc.a, tc.n, tc.want, got)
+			t.Errorf("%d: %#v >> %d should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
 		}
 	}
 }
@@ -548,7 +548,7 @@ func TestUint128_LeadingZeros(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.LeadingZeros()
 		if got != tc.want {
-			t.Errorf("%d: LeadingZeros of %v should %v, but %v", i, tc.a, tc.want, got)
+			t.Errorf("%d: LeadingZeros of %#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
 	}
 }
@@ -583,7 +583,7 @@ func TestUint128_TrailingZeros(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.TrailingZeros()
 		if got != tc.want {
-			t.Errorf("%d: TrailingZeros %v should %v, but %v", i, tc.a, tc.want, got)
+			t.Errorf("%d: TrailingZeros %#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
 	}
 }
@@ -618,7 +618,7 @@ func TestUint128_Len(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.Len()
 		if got != tc.want {
-			t.Errorf("%d: Len of %v should %v, but %v", i, tc.a, tc.want, got)
+			t.Errorf("%d: Len of %#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
 	}
 }
@@ -657,7 +657,68 @@ func TestUint128_OnesCount(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.OnesCount()
 		if got != tc.want {
-			t.Errorf("%d: OnesCount of %v should %v, but %v", i, tc.a, tc.want, got)
+			t.Errorf("%d: OnesCount of %#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
 	}
+}
+
+func TestUint128_String(t *testing.T) {
+	testCases := []struct {
+		a    Uint128
+		want string
+	}{
+		{
+			Uint128{0, 0},
+			"0",
+		},
+		{
+			// the max value of small integers
+			Uint128{0, 99},
+			"99",
+		},
+		{
+			Uint128{0, 100},
+			"100",
+		},
+		{
+			// the max value of uint64
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			"18446744073709551615",
+		},
+		{
+			// the max value of Uint128
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			"340282366920938463463374607431768211455",
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.String()
+		if got != tc.want {
+			t.Errorf("%d: string of %#v should %q, but %q", i, tc.a, tc.want, got)
+		}
+	}
+}
+
+func BenchmarkUint128_String(b *testing.B) {
+	b.Run("the max value of small integers", func(b *testing.B) {
+		v := Uint128{0, 99}
+		for i := 0; i < b.N; i++ {
+			runtime.KeepAlive(v.String())
+		}
+	})
+
+	b.Run("the max value of uint64", func(b *testing.B) {
+		v := Uint128{0, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			runtime.KeepAlive(v.String())
+		}
+	})
+
+	b.Run("the max value of Uint128", func(b *testing.B) {
+		v := Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			runtime.KeepAlive(v.String())
+		}
+	})
 }
