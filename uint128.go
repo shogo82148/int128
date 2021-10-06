@@ -148,6 +148,10 @@ func (a Uint128) RotateLeft(k int) Uint128 {
 	}
 }
 
+func (a Uint128) Reverse() Uint128 {
+	return Uint128{bits.Reverse64(a.L), bits.Reverse64(a.H)}
+}
+
 const nSmalls = 100
 
 const smallsString = "00010203040506070809" +

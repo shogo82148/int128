@@ -729,7 +729,33 @@ func TestUint128_RotateLeft(t *testing.T) {
 	for i, tc := range testCases {
 		got := tc.a.RotateLeft(tc.n)
 		if got != tc.want {
-			t.Errorf("%d: %#v >> %d should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
+			t.Errorf("%d: %#v.Rotate(%d) should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
+		}
+	}
+}
+
+func TestUint128_Reverse(t *testing.T) {
+	testCases := []struct {
+		a, want Uint128
+	}{
+		{
+			Uint128{0, 0},
+			Uint128{0, 0},
+		},
+		{
+			Uint128{0, 1},
+			Uint128{0x8000_0000_0000_0000, 0},
+		},
+		{
+			Uint128{0x8000_0000_0000_0000, 0},
+			Uint128{0, 1},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Reverse()
+		if got != tc.want {
+			t.Errorf("%d: %#v.Reverse() should %#v, but %#v", i, tc.a, tc.want, got)
 		}
 	}
 }
