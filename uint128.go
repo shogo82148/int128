@@ -263,6 +263,25 @@ func formatUint128(dst []byte, h, l uint64, base int, neg bool, append_ bool) ([
 		}
 		i--
 		s[i] = digits[l]
+	} else if isPowerOfTwo(base) {
+		// Use shifts and masks instead of / and %.
+		shift := uint(bits.TrailingZeros(uint(base))) & 7
+		b := uint64(base)
+		mask := uint(b) - 1 // == 1<<shift - 1
+		for h != 0 {
+			i--
+			s[i] = digits[uint(l)&mask]
+			l = h<<(64-shift) | l>>shift
+			h >>= shift
+		}
+		for l >= b {
+			i--
+			s[i] = digits[uint(l)&mask]
+			l >>= shift
+		}
+		// l < base
+		i--
+		s[i] = digits[uint(l)]
 	} else {
 		// general case
 		b := uint64(base)
@@ -288,4 +307,8 @@ func formatUint128(dst []byte, h, l uint64, base int, neg bool, append_ bool) ([
 		return append(dst, s[i:]...), ""
 	}
 	return nil, string(s[i:])
+}
+
+func isPowerOfTwo(x int) bool {
+	return x&(x-1) == 0
 }
