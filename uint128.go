@@ -156,6 +156,29 @@ func (a Uint128) ReverseBytes() Uint128 {
 	return Uint128{bits.ReverseBytes64(a.L), bits.ReverseBytes64(a.H)}
 }
 
+func Float64ToUint128(v float64) Uint128 {
+	neg := false
+	if v < 0 {
+		neg = true
+		v = -v
+	}
+	var ret Uint128
+	if v < 1<<64 {
+		ret = Uint128{0, uint64(v)}
+	} else {
+		// Uint128 cannot represent values greater or equal 1 << 128,
+		// however the spec says: https://golang.org/ref/spec#Conversions
+		// > if the result type cannot represent the value the conversion succeeds
+		// > but the result value is implementation-dependent.
+		// so we don't care these case.
+		ret = Uint128{uint64(v / (1 << 64)), 0}
+	}
+	if neg {
+		ret = ret.Neg()
+	}
+	return ret
+}
+
 const nSmalls = 100
 
 const smallsString = "00010203040506070809" +

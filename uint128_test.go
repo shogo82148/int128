@@ -786,6 +786,48 @@ func TestUint128_ReverseBytes(t *testing.T) {
 	}
 }
 
+func TestFloat64ToUint128(t *testing.T) {
+	testCases := []struct {
+		input float64
+		want  Uint128
+	}{
+		{
+			0,
+			Uint128{0, 0},
+		},
+		{
+			1,
+			Uint128{0, 1},
+		},
+		{
+			-1,
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			// the maximum float64 value that that can correctly represent an integer
+			1 << 53,
+			Uint128{0, 0x20000000000000},
+		},
+		{
+			// the maximum float64 value that can convert to uint64
+			(1<<53 - 1) << 11,
+			Uint128{0, 0xfffffffffffff800},
+		},
+		{
+			// the maximum float64 value that can convert to Uint128
+			(1<<53 - 1) << 75,
+			Uint128{0xfffffffffffff800, 0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := Float64ToUint128(tc.input)
+		if got != tc.want {
+			t.Errorf("%d: Float64ToUint128(%f) should %#v, but %#v", i, tc.input, tc.want, got)
+		}
+	}
+}
+
 func TestUint128_String(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
