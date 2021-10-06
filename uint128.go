@@ -150,9 +150,11 @@ const smallsString = "00010203040506070809" +
 	"80818283848586878889" +
 	"90919293949596979899"
 
+const digits = "0123456789abcdefghijklmnopqrstuvwxyz"
+
 func small(n int) string {
 	if n < 10 {
-		return smallsString[n*2+1 : n*2+2]
+		return digits[n : n+1]
 	}
 	return smallsString[n*2 : n*2+2]
 }
@@ -170,24 +172,35 @@ func (a Uint128) String() string {
 	i := len(s)
 
 	h, l := a.H, a.L
-	for h != 0 || l != 0 {
+	for h != 0 {
 		var r uint64
 		l, r = bits.Div64(h%power10, l, power10)
-		h = h / power10
+		h /= power10
 
 		for r > 0 {
 			is := (r % 100) * 2
-			i -= 2
 			r /= 100
+			i -= 2
 			s[i+1] = smallsString[is+1]
 			s[i+0] = smallsString[is+0]
 		}
 	}
 
-	// remove starting 0
-	for s[i] == '0' {
-		i++
+	for l >= 100 {
+		is := (l % 100) * 2
+		l /= 100
+		i -= 2
+		s[i+1] = smallsString[is+1]
+		s[i+0] = smallsString[is+0]
 	}
+
+	if l >= 10 {
+		i--
+		s[i] = digits[l%10]
+		l /= 10
+	}
+	i--
+	s[i] = digits[l]
 
 	return string(s[i:])
 }
