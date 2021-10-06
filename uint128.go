@@ -152,6 +152,10 @@ func (a Uint128) Reverse() Uint128 {
 	return Uint128{bits.Reverse64(a.L), bits.Reverse64(a.H)}
 }
 
+func (a Uint128) ReverseBytes() Uint128 {
+	return Uint128{bits.ReverseBytes64(a.L), bits.ReverseBytes64(a.H)}
+}
+
 const nSmalls = 100
 
 const smallsString = "00010203040506070809" +

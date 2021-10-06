@@ -760,6 +760,32 @@ func TestUint128_Reverse(t *testing.T) {
 	}
 }
 
+func TestUint128_ReverseBytes(t *testing.T) {
+	testCases := []struct {
+		a, want Uint128
+	}{
+		{
+			Uint128{0, 0},
+			Uint128{0, 0},
+		},
+		{
+			Uint128{0, 0x1234_5678_9abc_def0},
+			Uint128{0xf0de_bc9a_7856_3412, 0},
+		},
+		{
+			Uint128{0xf0de_bc9a_7856_3412, 0},
+			Uint128{0, 0x1234_5678_9abc_def0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.ReverseBytes()
+		if got != tc.want {
+			t.Errorf("%d: %#v.Reverse() should %#v, but %#v", i, tc.a, tc.want, got)
+		}
+	}
+}
+
 func TestUint128_String(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
