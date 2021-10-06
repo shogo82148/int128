@@ -622,3 +622,42 @@ func TestUint128_Len(t *testing.T) {
 		}
 	}
 }
+
+func TestUint128_OnesCount(t *testing.T) {
+	testCases := []struct {
+		a    Uint128
+		want int
+	}{
+		{
+			Uint128{0, 0},
+			0,
+		},
+		{
+			Uint128{0, 0xffff_ffff},
+			32,
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			64,
+		},
+		{
+			Uint128{0xffff_ffff, 0},
+			32,
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			64,
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			128,
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.OnesCount()
+		if got != tc.want {
+			t.Errorf("%d: OnesCount of %v should %v, but %v", i, tc.a, tc.want, got)
+		}
+	}
+}

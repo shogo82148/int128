@@ -130,3 +130,7 @@ func (a Uint128) Len() int {
 	}
 	return 64 + bits.Len64(a.H)
 }
+
+func (a Uint128) OnesCount() int {
+	return bits.OnesCount64(a.H) + bits.OnesCount64(a.L)
+}
