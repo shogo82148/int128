@@ -828,6 +828,229 @@ func TestFloat64ToUint128(t *testing.T) {
 	}
 }
 
+func TestUint128_Text(t *testing.T) {
+	testCases := []struct {
+		a    Uint128
+		base int
+		want string
+	}{
+		{
+			Uint128{0, 0},
+			2,
+			"0",
+		},
+		{
+			Uint128{0, 35},
+			36,
+			"z",
+		},
+		{
+			Uint128{0, 99},
+			10,
+			"99",
+		},
+		{
+			Uint128{0, 0x1234_5678_9abc_def0},
+			16,
+			"123456789abcdef0",
+		},
+		{
+			Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0},
+			16,
+			"123456789abcdef0123456789abcdef0",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			2,
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			2,
+			"11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			3,
+			"202201102121002021012000211012011021221022212021111001022110211020010021100121010",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			4,
+			"3333333333333333333333333333333333333333333333333333333333333333",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			5,
+			"11031110441201303134210404233413032443021130230130231310",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			6,
+			"23053353530155550541354043543542243325553444410303",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			7,
+			"3115512162124626343001006330151620356026315303",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			8,
+			"3777777777777777777777777777777777777777777",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			9,
+			"22642532235024164257285244038424203240533",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			10,
+			"340282366920938463463374607431768211455",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			16,
+			"ffffffffffffffffffffffffffffffff",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			32,
+			"7vvvvvvvvvvvvvvvvvvvvvvvvv",
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			36,
+			"f5lxx1zz5pnorynqglhzmsp33",
+		},
+	}
+
+	buf := make([]byte, 0, 128)
+	for i, tc := range testCases {
+		got := tc.a.Text(tc.base)
+		if got != tc.want {
+			t.Errorf("%d: %#v.Text(%d) should %q, but %q", i, tc.a, tc.base, tc.want, got)
+		}
+
+		buf = tc.a.Append(buf[:0], tc.base)
+		if string(buf) != tc.want {
+			t.Errorf("%d: %#v.Append(buf, %d) should %q, but %q", i, tc.a, tc.base, tc.want, got)
+		}
+	}
+}
+
+func BenchmarkUint128_Append(b *testing.B) {
+	buf := make([]byte, 0, 128)
+	b.Run("the max value of small integers(base 10)", func(b *testing.B) {
+		v := Uint128{0, 99}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 10)
+		}
+	})
+
+	b.Run("strconv.FormatUint(99, 10)", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			runtime.KeepAlive(strconv.FormatUint(99, 10))
+		}
+	})
+
+	b.Run("the max value of uint64 (base 2)", func(b *testing.B) {
+		v := Uint128{0, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 2)
+		}
+	})
+
+	b.Run("strconv.FormatUint(0xffff_ffff_ffff_ffff, 2)", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			strconv.AppendUint(buf, 0xffff_ffff_ffff_ffff, 2)
+		}
+	})
+
+	b.Run("the max value of uint64 (base 3)", func(b *testing.B) {
+		v := Uint128{0, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 3)
+		}
+	})
+
+	b.Run("strconv.FormatUint(0xffff_ffff_ffff_ffff, 3)", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			strconv.AppendUint(buf, 0xffff_ffff_ffff_ffff, 3)
+		}
+	})
+
+	b.Run("the max value of uint64 (base 16)", func(b *testing.B) {
+		v := Uint128{0, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 16)
+		}
+	})
+
+	b.Run("strconv.FormatUint(0xffff_ffff_ffff_ffff, 16)", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			strconv.AppendUint(buf, 0xffff_ffff_ffff_ffff, 16)
+		}
+	})
+
+	b.Run("the max value of uint64 (base 36)", func(b *testing.B) {
+		v := Uint128{0, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 36)
+		}
+	})
+
+	b.Run("strconv.FormatUint(0xffff_ffff_ffff_ffff, 36)", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			strconv.AppendUint(buf, 0xffff_ffff_ffff_ffff, 36)
+		}
+	})
+
+	b.Run("the max value of Uint128 (base 2)", func(b *testing.B) {
+		v := Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 2)
+		}
+	})
+
+	b.Run("the max value of Uint128 (base 3)", func(b *testing.B) {
+		v := Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 3)
+		}
+	})
+
+	b.Run("the max value of Uint128 (base 8)", func(b *testing.B) {
+		v := Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 8)
+		}
+	})
+
+	b.Run("the max value of Uint128 (base 16)", func(b *testing.B) {
+		v := Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 16)
+		}
+	})
+
+	b.Run("the max value of Uint128 (base 32)", func(b *testing.B) {
+		v := Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 32)
+		}
+	})
+
+	b.Run("the max value of Uint128 (base 36)", func(b *testing.B) {
+		v := Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff}
+		for i := 0; i < b.N; i++ {
+			v.Append(buf, 36)
+		}
+	})
+
+}
+
 func TestUint128_String(t *testing.T) {
 	testCases := []struct {
 		a    Uint128

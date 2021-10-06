@@ -179,6 +179,30 @@ func Float64ToUint128(v float64) Uint128 {
 	return ret
 }
 
+func (a Uint128) Text(base int) string {
+	if base == 10 && a.H == 0 && a.L < nSmalls {
+		return small(int(a.L))
+	}
+	_, s := formatUint128(nil, a.H, a.L, base, false, false)
+	return s
+}
+
+func (a Uint128) Append(dst []byte, base int) []byte {
+	if base == 10 && a.H == 0 && a.L < nSmalls {
+		return append(dst, small(int(a.L))...)
+	}
+	d, _ := formatUint128(dst, a.H, a.L, base, false, true)
+	return d
+}
+
+func (a Uint128) String() string {
+	if a.H == 0 && a.L < nSmalls {
+		return small(int(a.L))
+	}
+	_, s := formatUint128(nil, a.H, a.L, 10, false, false)
+	return s
+}
+
 const nSmalls = 100
 
 const smallsString = "00010203040506070809" +
@@ -201,48 +225,67 @@ func small(n int) string {
 	return smallsString[n*2 : n*2+2]
 }
 
-func (a Uint128) String() string {
-	if a.H == 0 && a.L < nSmalls {
-		return small(int(a.L))
+func formatUint128(dst []byte, h, l uint64, base int, neg bool, append_ bool) ([]byte, string) {
+	if base < 2 || base > len(digits) {
+		panic("int128: illegal Append/Format base")
 	}
 
-	// 1e19 is available on uint64
-	// however the exponent should be even, because we handle twe digits at time.
-	const power10 = 1e18
-
-	var s [40]byte
+	var s [128 + 1]byte
 	i := len(s)
 
-	h, l := a.H, a.L
-	for h != 0 {
-		var r uint64
-		l, r = bits.Div64(h%power10, l, power10)
-		h /= power10
-
-		for r > 0 {
-			is := (r % 100) * 2
-			r /= 100
+	if base == 10 {
+		// common case: use constants for / because
+		// the compiler can optimize it into a multiply+shift
+		for h != 0 {
+			var r uint64
+			l, r = bits.Div64(h%1e18, l, 1e18)
+			h /= 1e18
+			for r > 0 {
+				is := (r % 100) * 2
+				r /= 100
+				i -= 2
+				s[i+1] = smallsString[is+1]
+				s[i+0] = smallsString[is+0]
+			}
+		}
+		for l >= 100 {
+			is := (l % 100) * 2
+			l /= 100
 			i -= 2
 			s[i+1] = smallsString[is+1]
 			s[i+0] = smallsString[is+0]
 		}
-	}
 
-	for l >= 100 {
-		is := (l % 100) * 2
-		l /= 100
-		i -= 2
-		s[i+1] = smallsString[is+1]
-		s[i+0] = smallsString[is+0]
-	}
-
-	if l >= 10 {
+		if l >= 10 {
+			i--
+			s[i] = digits[l%10]
+			l /= 10
+		}
 		i--
-		s[i] = digits[l%10]
-		l /= 10
+		s[i] = digits[l]
+	} else {
+		// general case
+		b := uint64(base)
+		for h != 0 {
+			var r uint64
+			l, r = bits.Div64(h%b, l, b)
+			h /= b
+			i--
+			s[i] = digits[uint(r)]
+		}
+		for l >= b {
+			i--
+			q := l / b
+			s[i] = digits[uint(l-q*b)]
+			l = q
+		}
+		// l < base
+		i--
+		s[i] = digits[uint(l)]
 	}
-	i--
-	s[i] = digits[l]
 
-	return string(s[i:])
+	if append_ {
+		return append(dst, s[i:]...), ""
+	}
+	return nil, string(s[i:])
 }
