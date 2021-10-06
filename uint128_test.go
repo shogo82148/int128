@@ -663,6 +663,77 @@ func TestUint128_OnesCount(t *testing.T) {
 	}
 }
 
+func TestUint128_RotateLeft(t *testing.T) {
+	testCases := []struct {
+		a    Uint128
+		n    int
+		want Uint128
+	}{
+		{
+			Uint128{0, 0},
+			0,
+			Uint128{0, 0},
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			1,
+			Uint128{1, 0xffff_ffff_ffff_fffe},
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			-1,
+			Uint128{0x8000_0000_0000_0000, 0x7fff_ffff_ffff_ffff},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			1,
+			Uint128{0xffff_ffff_ffff_fffe, 1},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+			-1,
+			Uint128{0x7fff_ffff_ffff_ffff, 0x8000_0000_0000_0000},
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			32,
+			Uint128{0xffff_ffff, 0xffff_ffff_0000_0000},
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			-32,
+			Uint128{0xffff_ffff_0000_0000, 0xffff_ffff},
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			64,
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			-64,
+			Uint128{0xffff_ffff_ffff_ffff, 0},
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			96,
+			Uint128{0xffff_ffff_0000_0000, 0xffff_ffff},
+		},
+		{
+			Uint128{0, 0xffff_ffff_ffff_ffff},
+			-96,
+			Uint128{0xffff_ffff, 0xffff_ffff_0000_0000},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.RotateLeft(tc.n)
+		if got != tc.want {
+			t.Errorf("%d: %#v >> %d should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
+		}
+	}
+}
+
 func TestUint128_String(t *testing.T) {
 	testCases := []struct {
 		a    Uint128

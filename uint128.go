@@ -137,6 +137,17 @@ func (a Uint128) OnesCount() int {
 	return bits.OnesCount64(a.H) + bits.OnesCount64(a.L)
 }
 
+func (a Uint128) RotateLeft(k int) Uint128 {
+	const n = 128
+	s := uint(k) & (n - 1)
+	t := n - s
+	if s < 64 {
+		return Uint128{a.H<<s | a.L>>(64-s), a.L<<s | a.H>>(t-64)}
+	} else {
+		return Uint128{a.L<<(s-64) | a.H>>t, a.H<<(64-t) | a.L>>t}
+	}
+}
+
 const nSmalls = 100
 
 const smallsString = "00010203040506070809" +
