@@ -3,6 +3,7 @@ package int128
 import (
 	"math/big"
 	"runtime"
+	"strconv"
 	"testing"
 )
 
@@ -708,10 +709,22 @@ func BenchmarkUint128_String(b *testing.B) {
 		}
 	})
 
+	b.Run("strconv.FormatUint(99, 10)", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			runtime.KeepAlive(strconv.FormatUint(99, 10))
+		}
+	})
+
 	b.Run("the max value of uint64", func(b *testing.B) {
 		v := Uint128{0, 0xffff_ffff_ffff_ffff}
 		for i := 0; i < b.N; i++ {
 			runtime.KeepAlive(v.String())
+		}
+	})
+
+	b.Run("strconv.FormatUint(0xffff_ffff_ffff_ffff, 10)", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			runtime.KeepAlive(strconv.FormatUint(0xffff_ffff_ffff_ffff, 10))
 		}
 	})
 
