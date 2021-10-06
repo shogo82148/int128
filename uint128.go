@@ -123,3 +123,10 @@ func (a Uint128) TrailingZeros() int {
 	}
 	return bits.TrailingZeros64(a.L)
 }
+
+func (a Uint128) Len() int {
+	if a.H == 0 {
+		return bits.Len64(a.L)
+	}
+	return 64 + bits.Len64(a.H)
+}
