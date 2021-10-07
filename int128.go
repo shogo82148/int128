@@ -54,3 +54,9 @@ func (a Int128) AndNot(b Int128) Int128 {
 func (a Int128) Not() Int128 {
 	return Int128{^a.H, ^a.L}
 }
+
+func (a Int128) Neg() Int128 {
+	l, carry := bits.Add64(^a.L, 1, 0)
+	h, _ := bits.Add64(uint64(^a.H), 0, carry)
+	return Int128{int64(h), l}
+}

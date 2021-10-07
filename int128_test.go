@@ -304,3 +304,29 @@ func TestInt128_Not(t *testing.T) {
 		}
 	}
 }
+
+func TestInt128_Neg(t *testing.T) {
+	testCases := []struct {
+		a, want Int128
+	}{
+		{
+			Int128{0, 0},
+			Int128{0, 0},
+		},
+		{
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{0, 1},
+		},
+		{
+			Int128{0, 1},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Neg()
+		if got != tc.want {
+			t.Errorf("%d: -%#v should %#v, but %#v", i, tc.a, tc.want, got)
+		}
+	}
+}
