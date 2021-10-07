@@ -68,3 +68,11 @@ func (a Int128) Lsh(i uint) Int128 {
 		return Int128{int64(a.L << (i - 64)), 0}
 	}
 }
+
+func (a Int128) Rsh(i uint) Int128 {
+	if i < 64 {
+		return Int128{a.H >> i, uint64(a.H<<(64-i)) | a.L>>i}
+	} else {
+		return Int128{a.H >> 63, uint64(a.H >> (i - 64))}
+	}
+}

@@ -381,3 +381,86 @@ func TestInt128_Lsh(t *testing.T) {
 		}
 	}
 }
+
+func TestInt128_Rsh(t *testing.T) {
+	testCases := []struct {
+		a    Int128
+		n    uint
+		want Int128
+	}{
+		{
+			Int128{0, 0},
+			0,
+			Int128{0, 0},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			1,
+			Int128{0x3fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0},
+			16,
+			Int128{0x7fff_ffff_ffff, 0xffff_0000_0000_0000},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0},
+			32,
+			Int128{0x7fff_ffff, 0xffff_ffff_0000_0000},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0},
+			64,
+			Int128{0, 0x7fff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0},
+			65,
+			Int128{0, 0x3fff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0},
+			128,
+			Int128{0, 0},
+		},
+
+		// sign extension
+		{
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			1,
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0},
+			16,
+			Int128{-1, 0xffff_0000_0000_0000},
+		},
+		{
+			Int128{-1, 0},
+			32,
+			Int128{-1, 0xffff_ffff_0000_0000},
+		},
+		{
+			Int128{-1, 0},
+			64,
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0},
+			65,
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0},
+			128,
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Rsh(tc.n)
+		if got != tc.want {
+			t.Errorf("%d: %#v >> %d should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
+		}
+	}
+}
