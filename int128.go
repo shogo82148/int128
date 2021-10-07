@@ -76,3 +76,26 @@ func (a Int128) Rsh(i uint) Int128 {
 		return Int128{a.H >> 63, uint64(a.H >> (i - 64))}
 	}
 }
+
+func Float64ToInt128(v float64) Int128 {
+	neg := false
+	if v < 0 {
+		neg = true
+		v = -v
+	}
+	var ret Int128
+	if v < 1<<64 {
+		ret = Int128{0, uint64(v)}
+	} else {
+		// Uint128 cannot represent values greater or equal 1 << 128,
+		// however the spec says: https://golang.org/ref/spec#Conversions
+		// > if the result type cannot represent the value the conversion succeeds
+		// > but the result value is implementation-dependent.
+		// so we don't care these case.
+		ret = Int128{int64(v / (1 << 64)), 0}
+	}
+	if neg {
+		ret = ret.Neg()
+	}
+	return ret
+}

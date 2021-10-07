@@ -464,3 +464,50 @@ func TestInt128_Rsh(t *testing.T) {
 		}
 	}
 }
+
+func TestFloat64ToInt128(t *testing.T) {
+	testCases := []struct {
+		input float64
+		want  Int128
+	}{
+		{
+			0,
+			Int128{0, 0},
+		},
+		{
+			1,
+			Int128{0, 1},
+		},
+		{
+			-1,
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			// the maximum float64 value that that can correctly represent an integer
+			1 << 53,
+			Int128{0, 0x20000000000000},
+		},
+		{
+			// the maximum float64 value that can convert to uint64
+			(1<<53 - 1) << 11,
+			Int128{0, 0xfffffffffffff800},
+		},
+		{
+			// the maximum float64 value that can convert to Int128
+			(1<<53 - 1) << 74,
+			Int128{0x7ffffffffffffc00, 0},
+		},
+		{
+			// the minimum float64 value that can convert to Int128
+			-1 << 127,
+			Int128{-0x8000_0000_0000_0000, 0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := Float64ToInt128(tc.input)
+		if got != tc.want {
+			t.Errorf("%d: Float64ToInt128(%f) should %#v, but %#v", i, tc.input, tc.want, got)
+		}
+	}
+}
