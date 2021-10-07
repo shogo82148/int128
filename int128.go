@@ -19,6 +19,28 @@ func (a Int128) Sub(b Int128) Int128 {
 	return Int128{int64(h), l}
 }
 
+func (a Int128) Mul(b Int128) Int128 {
+	neg := false
+	if a.H < 0 {
+		neg = !neg
+		a = a.Neg()
+	}
+	if b.H < 0 {
+		neg = !neg
+		b = b.Neg()
+	}
+
+	h, l := bits.Mul64(a.L, b.L)
+	h1 := uint64(a.H) * b.L
+	h2 := a.L * uint64(b.H)
+	ret := Int128{int64(h + h1 + h2), l}
+
+	if neg {
+		ret = ret.Neg()
+	}
+	return ret
+}
+
 func (a Int128) Cmp(b Int128) int {
 	if a.H == b.H {
 		if a.L == b.L {

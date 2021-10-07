@@ -89,6 +89,55 @@ func BenchmarkInt128_Sub(b *testing.B) {
 	}
 }
 
+func TestInt128_Mul(t *testing.T) {
+	testCases := []struct {
+		a, b, want Int128
+	}{
+		{
+			Int128{0, 0},
+			Int128{0, 0},
+			Int128{0, 0},
+		},
+		{
+			Int128{0, 1},
+			Int128{0, 1},
+			Int128{0, 1},
+		},
+		{
+			Int128{0, 1},
+			Int128{1, 0},
+			Int128{1, 0},
+		},
+		{
+			Int128{1, 0},
+			Int128{0, 1},
+			Int128{1, 0},
+		},
+		{
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{0, 1},
+		},
+		{
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{0, 1},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{1, 0},
+			Int128{-1, 0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Mul(tc.b)
+		if got != tc.want {
+			t.Errorf("%d: %#v * %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
+		}
+	}
+}
+
 func TestInt128_Cmp(t *testing.T) {
 	testCases := []struct {
 		a, b Int128
