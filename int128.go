@@ -60,3 +60,11 @@ func (a Int128) Neg() Int128 {
 	h, _ := bits.Add64(uint64(^a.H), 0, carry)
 	return Int128{int64(h), l}
 }
+
+func (a Int128) Lsh(i uint) Int128 {
+	if i < 64 {
+		return Int128{a.H<<i | int64(a.L>>(64-i)), a.L << i}
+	} else {
+		return Int128{int64(a.L << (i - 64)), 0}
+	}
+}

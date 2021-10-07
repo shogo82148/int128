@@ -330,3 +330,54 @@ func TestInt128_Neg(t *testing.T) {
 		}
 	}
 }
+
+func TestInt128_Lsh(t *testing.T) {
+	testCases := []struct {
+		a    Int128
+		n    uint
+		want Int128
+	}{
+		{
+			Int128{0, 0},
+			0,
+			Int128{0, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			1,
+			Int128{0x01, 0xffff_ffff_ffff_fffe},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			16,
+			Int128{0xffff, 0xffff_ffff_ffff_0000},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			32,
+			Int128{0xffff_ffff, 0xffff_ffff_0000_0000},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			64,
+			Int128{-1, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			65,
+			Int128{-2, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			128,
+			Int128{0, 0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Lsh(tc.n)
+		if got != tc.want {
+			t.Errorf("%d: %#v << %d should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
+		}
+	}
+}
