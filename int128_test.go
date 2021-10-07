@@ -511,3 +511,213 @@ func TestFloat64ToInt128(t *testing.T) {
 		}
 	}
 }
+
+func TestInt128_Text(t *testing.T) {
+	testCases := []struct {
+		a    Int128
+		base int
+		want string
+	}{
+		{
+			Int128{0, 0},
+			2,
+			"0",
+		},
+		{
+			Int128{0, 35},
+			36,
+			"z",
+		},
+		{
+			Int128{0, 99},
+			10,
+			"99",
+		},
+		{
+			Int128{0, 0x1234_5678_9abc_def0},
+			16,
+			"123456789abcdef0",
+		},
+		{
+			Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0},
+			16,
+			"123456789abcdef0123456789abcdef0",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			2,
+			"1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			3,
+			"101100201022001010121000102002120122110122221010202000122201220121120010200022001",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			4,
+			"1333333333333333333333333333333333333333333333333333333333333333",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			5,
+			"3013030220323124042102424341431241221233040112312340402",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			6,
+			"11324454543055553250455021551551121442554522203131",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			7,
+			"1406241064412313155000336513424310163013142501",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			8,
+			"1777777777777777777777777777777777777777777",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			9,
+			"11321261117012076573587122018656546120261",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			10,
+			"170141183460469231731687303715884105727",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			16,
+			"7fffffffffffffffffffffffffffffff",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			32,
+			"3vvvvvvvvvvvvvvvvvvvvvvvvv",
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			36,
+			"7ksyyizzkutudzbv8aqztecjj",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			2,
+			"-10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			3,
+			"-101100201022001010121000102002120122110122221010202000122201220121120010200022002",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			4,
+			"-2000000000000000000000000000000000000000000000000000000000000000",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			5,
+			"-3013030220323124042102424341431241221233040112312340403",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			6,
+			"-11324454543055553250455021551551121442554522203132",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			7,
+			"-1406241064412313155000336513424310163013142502",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			8,
+			"-2000000000000000000000000000000000000000000",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			9,
+			"-11321261117012076573587122018656546120262",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			10,
+			"-170141183460469231731687303715884105728",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			16,
+			"-80000000000000000000000000000000",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			32,
+			"-40000000000000000000000000",
+		},
+		{
+			Int128{-0x8000_0000_0000_0000, 0},
+			36,
+			"-7ksyyizzkutudzbv8aqztecjk",
+		},
+	}
+
+	buf := make([]byte, 0, 128+1)
+	for i, tc := range testCases {
+		got := tc.a.Text(tc.base)
+		if got != tc.want {
+			t.Errorf("%d: %#v.Text(%d) should %q, but %q", i, tc.a, tc.base, tc.want, got)
+		}
+
+		buf = tc.a.Append(buf[:0], tc.base)
+		if string(buf) != tc.want {
+			t.Errorf("%d: %#v.Append(buf, %d) should %q, but %q", i, tc.a, tc.base, tc.want, got)
+		}
+	}
+}
+
+func TestInt128_String(t *testing.T) {
+	testCases := []struct {
+		a    Int128
+		want string
+	}{
+		{
+			Int128{0, 0},
+			"0",
+		},
+		{
+			// the max value of small integers
+			Int128{0, 99},
+			"99",
+		},
+		{
+			Int128{0, 100},
+			"100",
+		},
+		{
+			// the max value of uint64
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			"18446744073709551615",
+		},
+		{
+			// the max value of Int128
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			"170141183460469231731687303715884105727",
+		},
+		{
+			// the minium value of Int128
+			Int128{-0x8000_0000_0000_0000, 0},
+			"-170141183460469231731687303715884105728",
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.String()
+		if got != tc.want {
+			t.Errorf("%d: string of %#v should %q, but %q", i, tc.a, tc.want, got)
+		}
+	}
+}

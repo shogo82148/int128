@@ -87,7 +87,7 @@ func Float64ToInt128(v float64) Int128 {
 	if v < 1<<64 {
 		ret = Int128{0, uint64(v)}
 	} else {
-		// Uint128 cannot represent values greater or equal 1 << 128,
+		// Int128 cannot represent values greater or equal 1 << 128,
 		// however the spec says: https://golang.org/ref/spec#Conversions
 		// > if the result type cannot represent the value the conversion succeeds
 		// > but the result value is implementation-dependent.
@@ -98,4 +98,28 @@ func Float64ToInt128(v float64) Int128 {
 		ret = ret.Neg()
 	}
 	return ret
+}
+
+func (a Int128) Text(base int) string {
+	if base == 10 && a.H == 0 && a.L < nSmalls {
+		return small(int(a.L))
+	}
+	_, s := formatUint128(nil, uint64(a.H), a.L, base, a.H < 0, false)
+	return s
+}
+
+func (a Int128) Append(dst []byte, base int) []byte {
+	if base == 10 && a.H == 0 && a.L < nSmalls {
+		return append(dst, small(int(a.L))...)
+	}
+	d, _ := formatUint128(dst, uint64(a.H), a.L, base, a.H < 0, true)
+	return d
+}
+
+func (a Int128) String() string {
+	if a.H == 0 && a.L < nSmalls {
+		return small(int(a.L))
+	}
+	_, s := formatUint128(nil, uint64(a.H), a.L, 10, a.H < 0, false)
+	return s
 }

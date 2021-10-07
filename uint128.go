@@ -230,8 +230,14 @@ func formatUint128(dst []byte, h, l uint64, base int, neg bool, append_ bool) ([
 		panic("int128: illegal Append/Format base")
 	}
 
-	var s [128 + 1]byte
+	var s [128 + 1]byte // +1 is for the sign
 	i := len(s)
+
+	if neg {
+		var carry uint64
+		l, carry = bits.Add64(^l, 1, 0)
+		h, _ = bits.Add64(^h, 0, carry)
+	}
 
 	if base == 10 {
 		// common case: use constants for / because
@@ -301,6 +307,12 @@ func formatUint128(dst []byte, h, l uint64, base int, neg bool, append_ bool) ([
 		// l < base
 		i--
 		s[i] = digits[uint(l)]
+	}
+
+	// add the sign
+	if neg {
+		i--
+		s[i] = '-'
 	}
 
 	if append_ {
