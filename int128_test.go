@@ -138,3 +138,169 @@ func TestInt128_Cmp(t *testing.T) {
 		}
 	}
 }
+
+func TestInt128_And(t *testing.T) {
+	testCases := []struct {
+		a, b, want Int128
+	}{
+		{
+			Int128{-1, 0},
+			Int128{0, 0},
+			Int128{0, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{-1, 0},
+			Int128{0, 0},
+		},
+		{
+			Int128{-1, 0},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{-1, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.And(tc.b)
+		if got != tc.want {
+			t.Errorf("%d: %#v & %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
+		}
+	}
+}
+
+func TestInt128_Or(t *testing.T) {
+	testCases := []struct {
+		a, b, want Int128
+	}{
+		{
+			Int128{-1, 0},
+			Int128{0, 0},
+			Int128{-1, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{-1, 0},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Or(tc.b)
+		if got != tc.want {
+			t.Errorf("%d: %#v | %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
+		}
+	}
+}
+
+func TestInt128_Xor(t *testing.T) {
+	testCases := []struct {
+		a, b, want Int128
+	}{
+		{
+			Int128{-1, 0},
+			Int128{0, 0},
+			Int128{-1, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{-1, 0},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Xor(tc.b)
+		if got != tc.want {
+			t.Errorf("%d: %#v ^ %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
+		}
+	}
+}
+
+func TestInt128_AndNot(t *testing.T) {
+	testCases := []struct {
+		a, b, want Int128
+	}{
+		{
+			Int128{-1, 0},
+			Int128{0, 0},
+			Int128{-1, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{-1, 0},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.AndNot(tc.b)
+		if got != tc.want {
+			t.Errorf("%d: %#v &^ %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
+		}
+	}
+}
+
+func TestInt128_Not(t *testing.T) {
+	testCases := []struct {
+		a, want Int128
+	}{
+		{
+			Int128{0, 0},
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0},
+		},
+		{
+			Int128{-1, 0},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0, 0xffff_ffff_ffff_ffff},
+			Int128{-1, 0},
+		},
+	}
+
+	for i, tc := range testCases {
+		got := tc.a.Not()
+		if got != tc.want {
+			t.Errorf("%d: ^%#v should %#v, but %#v", i, tc.a, tc.want, got)
+		}
+	}
+}

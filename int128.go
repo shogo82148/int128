@@ -34,3 +34,23 @@ func (a Int128) Cmp(b Int128) int {
 		return -1
 	}
 }
+
+func (a Int128) And(b Int128) Int128 {
+	return Int128{a.H & b.H, a.L & b.L}
+}
+
+func (a Int128) Or(b Int128) Int128 {
+	return Int128{a.H | b.H, a.L | b.L}
+}
+
+func (a Int128) Xor(b Int128) Int128 {
+	return Int128{a.H ^ b.H, a.L ^ b.L}
+}
+
+func (a Int128) AndNot(b Int128) Int128 {
+	return Int128{a.H &^ b.H, a.L &^ b.L}
+}
+
+func (a Int128) Not() Int128 {
+	return Int128{^a.H, ^a.L}
+}
