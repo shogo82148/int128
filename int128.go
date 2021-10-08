@@ -41,6 +41,131 @@ func (a Int128) Mul(b Int128) Int128 {
 	return ret
 }
 
+func (a Int128) Div(b Int128) Int128 {
+	var negA, negB bool
+	if a.H < 0 {
+		negA = true
+		a = a.Neg()
+	}
+	if b.H < 0 {
+		negB = true
+		b = b.Neg()
+	}
+
+	div := a.Uint128().Div(b.Uint128())
+	if negA {
+		div = div.Add(Uint128{0, 1})
+	}
+	if negA != negB {
+		div = div.Neg()
+	}
+
+	return div.Int128()
+
+}
+
+func (a Int128) Mod(b Int128) Int128 {
+	var negA bool
+	if a.H < 0 {
+		negA = true
+		a = a.Neg()
+	}
+	if b.H < 0 {
+		b = b.Neg()
+	}
+
+	mod := a.Uint128().Mod(b.Uint128())
+	if negA {
+		mod = mod.Neg().Add(b.Uint128())
+	}
+
+	return mod.Int128()
+}
+
+func (a Int128) DivMod(b Int128) (Int128, Int128) {
+	var negA, negB bool
+	if a.H < 0 {
+		negA = true
+		a = a.Neg()
+	}
+	if b.H < 0 {
+		negB = true
+		b = b.Neg()
+	}
+
+	div, mod := a.Uint128().DivMod(b.Uint128())
+	if negA != negB {
+		div = div.Neg()
+	}
+	if negA {
+		mod = mod.Neg().Add(b.Uint128())
+		if negB {
+			div = div.Add(Uint128{0, 1})
+		} else {
+			div = div.Sub(Uint128{0, 1})
+		}
+	}
+
+	return div.Int128(), mod.Int128()
+}
+
+func (a Int128) Quo(b Int128) Int128 {
+	var negA, negB bool
+	if a.H < 0 {
+		negA = true
+		a = a.Neg()
+	}
+	if b.H < 0 {
+		negB = true
+		b = b.Neg()
+	}
+
+	div := a.Uint128().Div(b.Uint128())
+	if negA != negB {
+		div = div.Neg()
+	}
+	return div.Int128()
+}
+
+func (a Int128) Rem(b Int128) Int128 {
+	var negA bool
+	if a.H < 0 {
+		negA = true
+		a = a.Neg()
+	}
+	if b.H < 0 {
+		b = b.Neg()
+	}
+
+	mod := a.Uint128().Mod(b.Uint128())
+	if negA {
+		mod = mod.Neg()
+	}
+	return mod.Int128()
+}
+
+func (a Int128) QuoRem(b Int128) (Int128, Int128) {
+	var negA, negB bool
+	if a.H < 0 {
+		negA = true
+		a = a.Neg()
+	}
+	if b.H < 0 {
+		negB = true
+		b = b.Neg()
+	}
+
+	div, mod := a.Uint128().DivMod(b.Uint128())
+	if negA != negB {
+		div = div.Neg()
+	}
+	if negA {
+		mod = mod.Neg()
+	}
+
+	return div.Int128(), mod.Int128()
+}
+
 func (a Int128) Cmp(b Int128) int {
 	if a.H == b.H {
 		if a.L == b.L {
@@ -97,6 +222,10 @@ func (a Int128) Rsh(i uint) Int128 {
 	} else {
 		return Int128{a.H >> 63, uint64(a.H >> (i - 64))}
 	}
+}
+
+func (a Int128) Uint128() Uint128 {
+	return Uint128{uint64(a.H), a.L}
 }
 
 func Float64ToInt128(v float64) Int128 {

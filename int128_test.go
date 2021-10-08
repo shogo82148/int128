@@ -138,6 +138,142 @@ func TestInt128_Mul(t *testing.T) {
 	}
 }
 
+func TestInt128_DivMod(t *testing.T) {
+	testCases := []struct {
+		a, b, div, mod Int128
+	}{
+		{
+			Int128{0x101, 0x123},
+			Int128{0, 0x100},
+			Int128{0x1, 0x100_0000_0000_0001},
+			Int128{0, 0x23},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			Int128{1, 0},
+			Int128{0, 0x7fff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0},
+			Int128{1, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0x3fff_ffff_ffff_ffff},
+			Int128{1, 0x3fff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0, 5},
+			Int128{0, 2},
+			Int128{0, 2},
+			Int128{0, 1},
+		},
+		{
+			Int128{0, 5},
+			Int128{0, 2}.Neg(),
+			Int128{0, 2}.Neg(),
+			Int128{0, 1},
+		},
+		{
+			Int128{0, 5}.Neg(),
+			Int128{0, 2},
+			Int128{0, 3}.Neg(),
+			Int128{0, 1},
+		},
+		{
+			Int128{0, 5}.Neg(),
+			Int128{0, 2}.Neg(),
+			Int128{0, 3},
+			Int128{0, 1},
+		},
+	}
+
+	for i, tc := range testCases {
+		div, mod := tc.a.DivMod(tc.b)
+		if div != tc.div {
+			t.Errorf("%d: %#v / %#v should %#v, but %#v", i, tc.a, tc.b, tc.div, div)
+		}
+		if mod != tc.mod {
+			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
+		}
+
+		div = tc.a.Div(tc.b)
+		if div != tc.div {
+			t.Errorf("%d: %#v / %#v should %#v, but %#v", i, tc.a, tc.b, tc.div, div)
+		}
+		mod = tc.a.Mod(tc.b)
+		if mod != tc.mod {
+			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
+		}
+	}
+}
+
+func TestInt128_QuoRem(t *testing.T) {
+	testCases := []struct {
+		a, b, div, mod Int128
+	}{
+		{
+			Int128{0x101, 0x123},
+			Int128{0, 0x100},
+			Int128{0x1, 0x100_0000_0000_0001},
+			Int128{0, 0x23},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			Int128{1, 0},
+			Int128{0, 0x7fff_ffff_ffff_ffff},
+			Int128{0, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0},
+			Int128{1, 0xffff_ffff_ffff_ffff},
+			Int128{0, 0x3fff_ffff_ffff_ffff},
+			Int128{1, 0x3fff_ffff_ffff_ffff},
+		},
+		{
+			Int128{0, 5},
+			Int128{0, 2},
+			Int128{0, 2},
+			Int128{0, 1},
+		},
+		{
+			Int128{0, 5},
+			Int128{0, 2}.Neg(),
+			Int128{0, 2}.Neg(),
+			Int128{0, 1},
+		},
+		{
+			Int128{0, 5}.Neg(),
+			Int128{0, 2},
+			Int128{0, 2}.Neg(),
+			Int128{0, 1}.Neg(),
+		},
+		{
+			Int128{0, 5}.Neg(),
+			Int128{0, 2}.Neg(),
+			Int128{0, 2},
+			Int128{0, 1}.Neg(),
+		},
+	}
+
+	for i, tc := range testCases {
+		div, mod := tc.a.QuoRem(tc.b)
+		if div != tc.div {
+			t.Errorf("%d: %#v / %#v should %#v, but %#v", i, tc.a, tc.b, tc.div, div)
+		}
+		if mod != tc.mod {
+			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
+		}
+
+		div = tc.a.Quo(tc.b)
+		if div != tc.div {
+			t.Errorf("%d: %#v / %#v should %#v, but %#v", i, tc.a, tc.b, tc.div, div)
+		}
+		mod = tc.a.Rem(tc.b)
+		if mod != tc.mod {
+			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
+		}
+	}
+}
+
 func TestInt128_Cmp(t *testing.T) {
 	testCases := []struct {
 		a, b Int128

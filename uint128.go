@@ -54,6 +54,70 @@ func (a Uint128) Div(b Uint128) Uint128 {
 	return Uint128{0, q}
 }
 
+func (a Uint128) Mod(b Uint128) Uint128 {
+	if b.H == 0 {
+		// optimize for uint128 / uint64
+		_, rem := bits.Div64(a.H%b.L, a.L, b.L)
+		return Uint128{0, rem}
+	}
+
+	n := uint(bits.LeadingZeros64(b.H))
+	x := a.Rsh(1)
+	y := b.Lsh(n)
+	q, _ := bits.Div64(x.H, x.L, y.H)
+	q >>= 63 - n
+	if q > 0 {
+		q--
+	}
+
+	h, l := bits.Mul64(b.L, q)
+	h += b.H * q
+	r := a.Sub(Uint128{h, l})
+	if r.Cmp(b) >= 0 {
+		r = r.Sub(b)
+	}
+	return r
+}
+
+func (a Uint128) DivMod(b Uint128) (Uint128, Uint128) {
+	if b.H == 0 {
+		// optimize for uint128 / uint64
+		h := a.H / b.L
+		l, rem := bits.Div64(a.H%b.L, a.L, b.L)
+		return Uint128{h, l}, Uint128{0, rem}
+	}
+
+	n := uint(bits.LeadingZeros64(b.H))
+	x := a.Rsh(1)
+	y := b.Lsh(n)
+	q, _ := bits.Div64(x.H, x.L, y.H)
+	q >>= 63 - n
+	if q > 0 {
+		q--
+	}
+
+	h, l := bits.Mul64(b.L, q)
+	h += b.H * q
+	r := a.Sub(Uint128{h, l})
+	if r.Cmp(b) >= 0 {
+		q++
+		r = r.Sub(b)
+	}
+	return Uint128{0, q}, r
+}
+
+func (a Uint128) Quo(b Uint128) Uint128 {
+	return a.Div(b)
+}
+
+func (a Uint128) Rem(b Uint128) Uint128 {
+	return a.Mod(b)
+}
+
+func (a Uint128) QuoRem(b Uint128) (Uint128, Uint128) {
+	return a.DivMod(b)
+}
+
 func (a Uint128) Cmp(b Uint128) int {
 	if a.H == b.H {
 		if a.L == b.L {
@@ -154,6 +218,10 @@ func (a Uint128) Reverse() Uint128 {
 
 func (a Uint128) ReverseBytes() Uint128 {
 	return Uint128{bits.ReverseBytes64(a.L), bits.ReverseBytes64(a.H)}
+}
+
+func (a Uint128) Int128() Int128 {
+	return Int128{int64(a.H), a.L}
 }
 
 func Float64ToUint128(v float64) Uint128 {

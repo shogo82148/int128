@@ -156,31 +156,46 @@ func TestUint128_Mul(t *testing.T) {
 	}
 }
 
-func TestUint128_Div(t *testing.T) {
+func TestUint128_DivMod(t *testing.T) {
 	testCases := []struct {
-		a, b, want Uint128
+		a, b, div, mod Uint128
 	}{
 		{
-			Uint128{0x101, 0x100},
+			Uint128{0x101, 0x123},
 			Uint128{0, 0x100},
 			Uint128{0x1, 0x100_0000_0000_0001},
+			Uint128{0, 0x23},
 		},
 		{
-			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			Uint128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
 			Uint128{1, 0},
+			Uint128{0, 0x7fff_ffff_ffff_ffff},
 			Uint128{0, 0xffff_ffff_ffff_ffff},
 		},
 		{
-			Uint128{0xffff_ffff_ffff_ffff, 0},
+			Uint128{0x7fff_ffff_ffff_ffff, 0},
 			Uint128{1, 0xffff_ffff_ffff_ffff},
-			Uint128{0, 0x7fff_ffff_ffff_ffff},
+			Uint128{0, 0x3fff_ffff_ffff_ffff},
+			Uint128{1, 0x3fff_ffff_ffff_ffff},
 		},
 	}
 
 	for i, tc := range testCases {
-		got := tc.a.Div(tc.b)
-		if got != tc.want {
-			t.Errorf("%d: %#v / %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
+		div, mod := tc.a.DivMod(tc.b)
+		if div != tc.div {
+			t.Errorf("%d: %#v / %#v should %#v, but %#v", i, tc.a, tc.b, tc.div, div)
+		}
+		if mod != tc.mod {
+			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
+		}
+
+		div = tc.a.Div(tc.b)
+		if div != tc.div {
+			t.Errorf("%d: %#v / %#v should %#v, but %#v", i, tc.a, tc.b, tc.div, div)
+		}
+		mod = tc.a.Mod(tc.b)
+		if mod != tc.mod {
+			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
 		}
 	}
 }
