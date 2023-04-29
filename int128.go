@@ -2,23 +2,31 @@ package int128
 
 import "math/bits"
 
+// Int128 is a signed 128-bit integer.
 type Int128 struct {
 	H int64
 	L uint64
 }
 
+// Add returns the sum a+b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) Add(b Int128) Int128 {
 	l, carry := bits.Add64(a.L, b.L, 0)
 	h, _ := bits.Add64(uint64(a.H), uint64(b.H), carry)
 	return Int128{int64(h), l}
 }
 
+// Sub returns the difference x-y.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) Sub(b Int128) Int128 {
 	l, borrow := bits.Sub64(a.L, b.L, 0)
 	h, _ := bits.Sub64(uint64(a.H), uint64(b.H), borrow)
 	return Int128{int64(h), l}
 }
 
+// Mul returns the product x*y.
 func (a Int128) Mul(b Int128) Int128 {
 	neg := false
 	if a.H < 0 {
@@ -41,6 +49,8 @@ func (a Int128) Mul(b Int128) Int128 {
 	return ret
 }
 
+// Div returns the quotient a/b for b != 0.
+// If b == 0, a division-by-zero run-time panic occurs.
 func (a Int128) Div(b Int128) Int128 {
 	var negA, negB bool
 	if a.H < 0 {
@@ -64,6 +74,8 @@ func (a Int128) Div(b Int128) Int128 {
 
 }
 
+// Mod returns the modulus x%y for y != 0.
+// If y == 0, a division-by-zero run-time panic occurs.
 func (a Int128) Mod(b Int128) Int128 {
 	var negA bool
 	if a.H < 0 {
@@ -82,6 +94,13 @@ func (a Int128) Mod(b Int128) Int128 {
 	return mod.Int128()
 }
 
+// DivMod returns the quotient and remainder of a/b for b != 0.
+// If b == 0, a division-by-zero run-time panic occurs.
+//
+// DivMod implements Euclidean division and modulus (unlike Go):
+//
+//	q = a div b  such that
+//	m = a - b*q  with 0 <= m < |y|
 func (a Int128) DivMod(b Int128) (Int128, Int128) {
 	var negA, negB bool
 	if a.H < 0 {
@@ -109,6 +128,9 @@ func (a Int128) DivMod(b Int128) (Int128, Int128) {
 	return div.Int128(), mod.Int128()
 }
 
+// Quo returns the quotient a/b for b != 0.
+// If b == 0, a division-by-zero run-time panic occurs.
+// Quo implements truncated division (like Go); see QuoRem for more details.
 func (a Int128) Quo(b Int128) Int128 {
 	var negA, negB bool
 	if a.H < 0 {
@@ -127,6 +149,9 @@ func (a Int128) Quo(b Int128) Int128 {
 	return div.Int128()
 }
 
+// Rem returns he remainder a%b for b != 0.
+// If b == 0, a division-by-zero run-time panic occurs.
+// Rem implements truncated modulus (like Go); see QuoRem for more details.
 func (a Int128) Rem(b Int128) Int128 {
 	var negA bool
 	if a.H < 0 {
@@ -144,6 +169,13 @@ func (a Int128) Rem(b Int128) Int128 {
 	return mod.Int128()
 }
 
+// QuoRem returns the quotient a/b and the remainder a%b for b != 0.
+// a division-by-zero run-time panic occurs.
+//
+// QuoRem implements T-division and modulus (like Go):
+//
+//	q = a/b      with the result truncated to zero
+//	r = a - b*q
 func (a Int128) QuoRem(b Int128) (Int128, Int128) {
 	var negA, negB bool
 	if a.H < 0 {
@@ -166,6 +198,11 @@ func (a Int128) QuoRem(b Int128) (Int128, Int128) {
 	return div.Int128(), mod.Int128()
 }
 
+// Cmp compares a and b and returns:
+//
+//	-1 if a <  b
+//	 0 if a == b
+//	+1 if a >  b
 func (a Int128) Cmp(b Int128) int {
 	if a.H == b.H {
 		if a.L == b.L {
@@ -182,32 +219,51 @@ func (a Int128) Cmp(b Int128) int {
 	}
 }
 
+// And returns the bitwise AND a&b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) And(b Int128) Int128 {
 	return Int128{a.H & b.H, a.L & b.L}
 }
 
+// Or returns the bitwise OR a|b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) Or(b Int128) Int128 {
 	return Int128{a.H | b.H, a.L | b.L}
 }
 
+// Xor returns the bitwise XOR a^b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) Xor(b Int128) Int128 {
 	return Int128{a.H ^ b.H, a.L ^ b.L}
 }
 
+// AndNot returns the bitwise AND NOT a&^b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) AndNot(b Int128) Int128 {
 	return Int128{a.H &^ b.H, a.L &^ b.L}
 }
 
+// Not returns the bitwise NOT ^a.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) Not() Int128 {
 	return Int128{^a.H, ^a.L}
 }
 
+// Neg returns the negation -a.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) Neg() Int128 {
 	l, carry := bits.Add64(^a.L, 1, 0)
 	h, _ := bits.Add64(uint64(^a.H), 0, carry)
 	return Int128{int64(h), l}
 }
 
+// Lsh returns the logical left shift a<<i.
 func (a Int128) Lsh(i uint) Int128 {
 	if i < 64 {
 		return Int128{a.H<<i | int64(a.L>>(64-i)), a.L << i}
@@ -216,6 +272,7 @@ func (a Int128) Lsh(i uint) Int128 {
 	}
 }
 
+// Rsh returns the logical right shift a>>i.
 func (a Int128) Rsh(i uint) Int128 {
 	if i < 64 {
 		return Int128{a.H >> i, uint64(a.H<<(64-i)) | a.L>>i}
@@ -224,10 +281,12 @@ func (a Int128) Rsh(i uint) Int128 {
 	}
 }
 
+// Uint128 returns a as a unsigned 128-bit integer.
 func (a Int128) Uint128() Uint128 {
 	return Uint128{uint64(a.H), a.L}
 }
 
+// Float64ToUint128 returns the nearest Uint128 representation of v.
 func Float64ToInt128(v float64) Int128 {
 	neg := false
 	if v < 0 {
@@ -251,6 +310,10 @@ func Float64ToInt128(v float64) Int128 {
 	return ret
 }
 
+// Text returns the string representation of a in the given base.
+// Base must be between 2 and 62, inclusive.
+// The result uses the lower-case letters 'a' to 'z' for digit values 10 to 35,
+// and the upper-case letters 'A' to 'Z' for digit values 36 to 61. No prefix (such as "0x") is added to the string.
 func (a Int128) Text(base int) string {
 	if base == 10 && a.H == 0 && a.L < nSmalls {
 		return small(int(a.L))
@@ -259,6 +322,7 @@ func (a Int128) Text(base int) string {
 	return s
 }
 
+// Append appends the string representation of a, as generated by a.Text(base), to buf and returns the extended buffer.
 func (a Int128) Append(dst []byte, base int) []byte {
 	if base == 10 && a.H == 0 && a.L < nSmalls {
 		return append(dst, small(int(a.L))...)
@@ -267,6 +331,7 @@ func (a Int128) Append(dst []byte, base int) []byte {
 	return d
 }
 
+// String returns the decimal representation of a as generated by a.Text(10).
 func (a Int128) String() string {
 	if a.H == 0 && a.L < nSmalls {
 		return small(int(a.L))

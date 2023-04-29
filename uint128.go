@@ -4,23 +4,33 @@ import (
 	"math/bits"
 )
 
+// Uint128 is a 128-bit unsigned integer.
 type Uint128 struct {
 	H uint64
 	L uint64
 }
 
+// Add returns the sum a+b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Add(b Uint128) Uint128 {
 	l, carry := bits.Add64(a.L, b.L, 0)
 	h, _ := bits.Add64(a.H, b.H, carry)
 	return Uint128{h, l}
 }
 
+// Sub returns the difference x-y.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Sub(b Uint128) Uint128 {
 	l, borrow := bits.Sub64(a.L, b.L, 0)
 	h, _ := bits.Sub64(a.H, b.H, borrow)
 	return Uint128{h, l}
 }
 
+// Mul returns the product x*y.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Mul(b Uint128) Uint128 {
 	h, l := bits.Mul64(a.L, b.L)
 	h1 := a.H * b.L
@@ -28,6 +38,8 @@ func (a Uint128) Mul(b Uint128) Uint128 {
 	return Uint128{h + h1 + h2, l}
 }
 
+// Div returns the quotient a/b for b != 0.
+// If b == 0, a division-by-zero run-time panic occurs.
 func (a Uint128) Div(b Uint128) Uint128 {
 	if b.H == 0 {
 		// optimize for uint128 / uint64
@@ -54,6 +66,8 @@ func (a Uint128) Div(b Uint128) Uint128 {
 	return Uint128{0, q}
 }
 
+// Mod returns the modulus x%y for y != 0.
+// If y == 0, a division-by-zero run-time panic occurs.
 func (a Uint128) Mod(b Uint128) Uint128 {
 	if b.H == 0 {
 		// optimize for uint128 / uint64
@@ -79,6 +93,13 @@ func (a Uint128) Mod(b Uint128) Uint128 {
 	return r
 }
 
+// DivMod returns the quotient and remainder of a/b for b != 0.
+// If b == 0, a division-by-zero run-time panic occurs.
+//
+// DivMod implements Euclidean division and modulus (unlike Go):
+//
+//	q = a div b  such that
+//	m = a - b*q  with 0 <= m < |y|
 func (a Uint128) DivMod(b Uint128) (Uint128, Uint128) {
 	if b.H == 0 {
 		// optimize for uint128 / uint64
@@ -106,18 +127,36 @@ func (a Uint128) DivMod(b Uint128) (Uint128, Uint128) {
 	return Uint128{0, q}, r
 }
 
+// Quo returns the quotient a/b for b != 0.
+// If b == 0, a division-by-zero run-time panic occurs.
+// Quo implements truncated division (like Go); see QuoRem for more details.
 func (a Uint128) Quo(b Uint128) Uint128 {
 	return a.Div(b)
 }
 
+// Rem returns he remainder a%b for b != 0.
+// If b == 0, a division-by-zero run-time panic occurs.
+// Rem implements truncated modulus (like Go); see QuoRem for more details.
 func (a Uint128) Rem(b Uint128) Uint128 {
 	return a.Mod(b)
 }
 
+// QuoRem returns the quotient a/b and the remainder a%b for b != 0.
+// a division-by-zero run-time panic occurs.
+//
+// QuoRem implements T-division and modulus (like Go):
+//
+//	q = a/b      with the result truncated to zero
+//	r = a - b*q
 func (a Uint128) QuoRem(b Uint128) (Uint128, Uint128) {
 	return a.DivMod(b)
 }
 
+// Cmp compares a and b and returns:
+//
+//	-1 if a <  b
+//	 0 if a == b
+//	+1 if a >  b
 func (a Uint128) Cmp(b Uint128) int {
 	if a.H == b.H {
 		if a.L == b.L {
@@ -134,32 +173,51 @@ func (a Uint128) Cmp(b Uint128) int {
 	}
 }
 
+// And returns the bitwise AND a&b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) And(b Uint128) Uint128 {
 	return Uint128{a.H & b.H, a.L & b.L}
 }
 
+// Or returns the bitwise OR a|b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Or(b Uint128) Uint128 {
 	return Uint128{a.H | b.H, a.L | b.L}
 }
 
+// Xor returns the bitwise XOR a^b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Xor(b Uint128) Uint128 {
 	return Uint128{a.H ^ b.H, a.L ^ b.L}
 }
 
+// AndNot returns the bitwise AND NOT a&^b.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) AndNot(b Uint128) Uint128 {
 	return Uint128{a.H &^ b.H, a.L &^ b.L}
 }
 
+// Not returns the bitwise NOT ^a.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Not() Uint128 {
 	return Uint128{^a.H, ^a.L}
 }
 
+// Neg returns the negation -a.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Neg() Uint128 {
 	l, carry := bits.Add64(^a.L, 1, 0)
 	h, _ := bits.Add64(^a.H, 0, carry)
 	return Uint128{h, l}
 }
 
+// Lsh returns the logical left shift a<<i.
 func (a Uint128) Lsh(i uint) Uint128 {
 	if i < 64 {
 		return Uint128{a.H<<i | a.L>>(64-i), a.L << i}
@@ -168,6 +226,7 @@ func (a Uint128) Lsh(i uint) Uint128 {
 	}
 }
 
+// Rsh returns the logical right shift a>>i.
 func (a Uint128) Rsh(i uint) Uint128 {
 	if i < 64 {
 		return Uint128{a.H >> i, a.H<<(64-i) | a.L>>i}
@@ -176,6 +235,7 @@ func (a Uint128) Rsh(i uint) Uint128 {
 	}
 }
 
+// LeadingZeros returns the number of leading zero bits in a; the result is 128 for a == 0.
 func (a Uint128) LeadingZeros() int {
 	if a.H == 0 {
 		return 64 + bits.LeadingZeros64(a.L)
@@ -183,6 +243,7 @@ func (a Uint128) LeadingZeros() int {
 	return bits.LeadingZeros64(a.H)
 }
 
+// TrailingZeros returns the number of trailing zero bits in a; the result is 128 for a == 0.
 func (a Uint128) TrailingZeros() int {
 	if a.L == 0 {
 		return 64 + bits.TrailingZeros64(a.H)
@@ -190,6 +251,7 @@ func (a Uint128) TrailingZeros() int {
 	return bits.TrailingZeros64(a.L)
 }
 
+// Len returns the minimum number of bits required to represent a; the result is 0 for a == 0.
 func (a Uint128) Len() int {
 	if a.H == 0 {
 		return bits.Len64(a.L)
@@ -197,10 +259,12 @@ func (a Uint128) Len() int {
 	return 64 + bits.Len64(a.H)
 }
 
+// OnesCount returns the number of one bits ("population count") in a.
 func (a Uint128) OnesCount() int {
 	return bits.OnesCount64(a.H) + bits.OnesCount64(a.L)
 }
 
+// RotateLeft returns the value of a rotated left by (k mod 128) bits.
 func (a Uint128) RotateLeft(k int) Uint128 {
 	const n = 128
 	s := uint(k) & (n - 1)
@@ -212,18 +276,24 @@ func (a Uint128) RotateLeft(k int) Uint128 {
 	}
 }
 
+// Reverse returns the value of a with its bits in reversed order.
 func (a Uint128) Reverse() Uint128 {
 	return Uint128{bits.Reverse64(a.L), bits.Reverse64(a.H)}
 }
 
+// ReverseBytes returns the value of a with its bytes in reversed order.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) ReverseBytes() Uint128 {
 	return Uint128{bits.ReverseBytes64(a.L), bits.ReverseBytes64(a.H)}
 }
 
+// Int128 returns a as a signed 128-bit integer.
 func (a Uint128) Int128() Int128 {
 	return Int128{int64(a.H), a.L}
 }
 
+// Float64ToUint128 returns the nearest Uint128 representation of v.
 func Float64ToUint128(v float64) Uint128 {
 	neg := false
 	if v < 0 {
@@ -247,6 +317,10 @@ func Float64ToUint128(v float64) Uint128 {
 	return ret
 }
 
+// Text returns the string representation of a in the given base.
+// Base must be between 2 and 62, inclusive.
+// The result uses the lower-case letters 'a' to 'z' for digit values 10 to 35,
+// and the upper-case letters 'A' to 'Z' for digit values 36 to 61. No prefix (such as "0x") is added to the string.
 func (a Uint128) Text(base int) string {
 	if base == 10 && a.H == 0 && a.L < nSmalls {
 		return small(int(a.L))
@@ -255,6 +329,7 @@ func (a Uint128) Text(base int) string {
 	return s
 }
 
+// Append appends the string representation of a, as generated by a.Text(base), to buf and returns the extended buffer.
 func (a Uint128) Append(dst []byte, base int) []byte {
 	if base == 10 && a.H == 0 && a.L < nSmalls {
 		return append(dst, small(int(a.L))...)
@@ -263,6 +338,7 @@ func (a Uint128) Append(dst []byte, base int) []byte {
 	return d
 }
 
+// String returns the decimal representation of a as generated by a.Text(10).
 func (a Uint128) String() string {
 	if a.H == 0 && a.L < nSmalls {
 		return small(int(a.L))
