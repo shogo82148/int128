@@ -264,21 +264,25 @@ func (a Int128) Neg() Int128 {
 }
 
 // Lsh returns the logical left shift a<<i.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) Lsh(i uint) Int128 {
-	if i < 64 {
-		return Int128{a.H<<i | int64(a.L>>(64-i)), a.L << i}
-	} else {
-		return Int128{int64(a.L << (i - 64)), 0}
-	}
+	n, v := bits.Sub(i, 64, 0)
+	m := ^n + 1
+
+	mask := uint64(int(v) - 1)
+	return Int128{a.H<<i | int64(mask&(a.L<<n)) | int64(^mask&(a.L>>m)), a.L << i}
 }
 
 // Rsh returns the logical right shift a>>i.
+//
+// This function's execution time does not depend on the inputs.
 func (a Int128) Rsh(i uint) Int128 {
-	if i < 64 {
-		return Int128{a.H >> i, uint64(a.H<<(64-i)) | a.L>>i}
-	} else {
-		return Int128{a.H >> 63, uint64(a.H >> (i - 64))}
-	}
+	n, v := bits.Sub(i, 64, 0)
+	m := ^n + 1
+
+	mask := uint64(int(v) - 1)
+	return Int128{a.H >> i, mask&uint64(a.H>>n) | ^mask&uint64(a.H<<m) | a.L>>i}
 }
 
 // Uint128 returns a as a unsigned 128-bit integer.
