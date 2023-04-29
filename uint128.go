@@ -218,21 +218,25 @@ func (a Uint128) Neg() Uint128 {
 }
 
 // Lsh returns the logical left shift a<<i.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Lsh(i uint) Uint128 {
-	if i < 64 {
-		return Uint128{a.H<<i | a.L>>(64-i), a.L << i}
-	} else {
-		return Uint128{a.L << (i - 64), 0}
-	}
+	n, v := bits.Sub(i, 64, 0)
+	m := ^n + 1
+
+	mask := uint64(int(v) - 1)
+	return Uint128{a.H<<i | (mask & (a.L << n)) | (^mask & (a.L >> m)), a.L << i}
 }
 
 // Rsh returns the logical right shift a>>i.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) Rsh(i uint) Uint128 {
-	if i < 64 {
-		return Uint128{a.H >> i, a.H<<(64-i) | a.L>>i}
-	} else {
-		return Uint128{0, a.H >> (i - 64)}
-	}
+	n, v := bits.Sub(i, 64, 0)
+	m := ^n + 1
+
+	mask := uint64(int(v) - 1)
+	return Uint128{a.H >> i, mask&(a.H>>n) | ^mask&(a.H<<m) | a.L>>i}
 }
 
 // LeadingZeros returns the number of leading zero bits in a; the result is 128 for a == 0.

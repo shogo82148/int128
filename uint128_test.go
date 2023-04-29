@@ -483,6 +483,12 @@ func TestUint128_Lsh(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_Lsh(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(Uint128Input.Lsh(uint(i) % 128))
+	}
+}
+
 func TestUint128_Rsh(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
@@ -531,6 +537,14 @@ func TestUint128_Rsh(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: %#v >> %d should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
 		}
+	}
+}
+
+var Uint128Input Uint128
+
+func BenchmarkUint128_Rsh(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(Uint128Input.Rsh(uint(i) % 128))
 	}
 }
 
