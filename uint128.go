@@ -1,6 +1,7 @@
 package int128
 
 import (
+	"math"
 	"math/bits"
 )
 
@@ -299,23 +300,24 @@ func (a Uint128) Int128() Int128 {
 
 // Float64ToUint128 returns the nearest Uint128 representation of v.
 func Float64ToUint128(v float64) Uint128 {
-	neg := false
-	if v < 0 {
-		neg = true
-		v = -v
+	b := math.Float64bits(v)
+	exp := int((b>>52)&0x7FF) - 1023
+	frac := b&0xFFFFFFFFFFFFF | 0x10000000000000
+	if exp < 0 {
+		return Uint128{}
 	}
-	var ret Uint128
-	if v < 1<<64 {
-		ret = Uint128{0, uint64(v)}
+	ret := Uint128{0, frac}
+	if exp < 52 {
+		ret = ret.Rsh(uint(52 - exp))
 	} else {
 		// Uint128 cannot represent values greater or equal 1 << 128,
 		// however the spec says: https://golang.org/ref/spec#Conversions
 		// > if the result type cannot represent the value the conversion succeeds
 		// > but the result value is implementation-dependent.
 		// so we don't care these case.
-		ret = Uint128{uint64(v / (1 << 64)), 0}
+		ret = ret.Lsh(uint(exp - 52))
 	}
-	if neg {
+	if b&0x8000000000000000 != 0 {
 		ret = ret.Neg()
 	}
 	return ret

@@ -825,6 +825,10 @@ func TestFloat64ToUint128(t *testing.T) {
 			Uint128{0, 0},
 		},
 		{
+			0.5,
+			Uint128{0, 0},
+		},
+		{
 			1,
 			Uint128{0, 1},
 		},
@@ -841,6 +845,11 @@ func TestFloat64ToUint128(t *testing.T) {
 			// the maximum float64 value that can convert to uint64
 			(1<<53 - 1) << 11,
 			Uint128{0, 0xfffffffffffff800},
+		},
+		{
+			// the maximum float64 value that can convert to 65-bits integer
+			(1<<53 - 1) << 12,
+			Uint128{1, 0xfffffffffffff000},
 		},
 		{
 			// the maximum float64 value that can convert to Uint128
