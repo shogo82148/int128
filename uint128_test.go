@@ -5,7 +5,47 @@ import (
 	"runtime"
 	"strconv"
 	"testing"
+	"testing/quick"
 )
+
+var bigModUint128, _ = new(big.Int).SetString("100000000000000000000000000000000", 16)
+
+func uint128ToBig(b *big.Int, x Uint128) *big.Int {
+	if b == nil {
+		b = new(big.Int)
+	}
+	b.SetBytes([]byte{
+		byte(x.H >> 56),
+		byte(x.H >> 48),
+		byte(x.H >> 40),
+		byte(x.H >> 32),
+		byte(x.H >> 24),
+		byte(x.H >> 16),
+		byte(x.H >> 8),
+		byte(x.H),
+		byte(x.L >> 56),
+		byte(x.L >> 48),
+		byte(x.L >> 40),
+		byte(x.L >> 32),
+		byte(x.L >> 24),
+		byte(x.L >> 16),
+		byte(x.L >> 8),
+		byte(x.L),
+	})
+	return b
+}
+
+func bigToUint128(x *big.Int) Uint128 {
+	var buf [16]byte
+	z := new(big.Int).Mod(x, bigModUint128)
+	z.FillBytes(buf[:])
+	return Uint128{
+		H: (uint64(buf[0]) << 56) | (uint64(buf[1]) << 48) | (uint64(buf[2]) << 40) | (uint64(buf[3]) << 32) |
+			(uint64(buf[4]) << 24) | (uint64(buf[5]) << 16) | (uint64(buf[6]) << 8) | uint64(buf[7]),
+		L: (uint64(buf[8]) << 56) | (uint64(buf[9]) << 48) | (uint64(buf[10]) << 40) | (uint64(buf[11]) << 32) |
+			(uint64(buf[12]) << 24) | (uint64(buf[13]) << 16) | (uint64(buf[14]) << 8) | uint64(buf[15]),
+	}
+}
 
 func TestUint128_Add(t *testing.T) {
 	testCases := []struct {
@@ -62,6 +102,23 @@ func BenchmarkBigUint128_Add(b *testing.B) {
 	}
 }
 
+func TestInt128_AddQuick(t *testing.T) {
+	f := func(a, b Uint128) Uint128 {
+		return a.Add(b)
+	}
+	g := func(a, b Uint128) Uint128 {
+		bigA := uint128ToBig(new(big.Int), a)
+		bigB := uint128ToBig(new(big.Int), b)
+		bigA.Add(bigA, bigB)
+		return bigToUint128(bigA)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestUint128_Sub(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
@@ -104,6 +161,23 @@ func BenchmarkBigUint128_Sub(b *testing.B) {
 	y, _ := new(big.Int).SetString("0x1234_5678_9abc_def0_1234_5678_9abc_def0", 0)
 	for i := 0; i < b.N; i++ {
 		runtime.KeepAlive(new(big.Int).Sub(x, y))
+	}
+}
+
+func TestInt128_SubQuick(t *testing.T) {
+	f := func(a, b Uint128) Uint128 {
+		return a.Sub(b)
+	}
+	g := func(a, b Uint128) Uint128 {
+		bigA := uint128ToBig(new(big.Int), a)
+		bigB := uint128ToBig(new(big.Int), b)
+		bigA.Sub(bigA, bigB)
+		return bigToUint128(bigA)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -156,6 +230,23 @@ func TestUint128_Mul(t *testing.T) {
 	}
 }
 
+func TestInt128_MulQuick(t *testing.T) {
+	f := func(a, b Uint128) Uint128 {
+		return a.Mul(b)
+	}
+	g := func(a, b Uint128) Uint128 {
+		bigA := uint128ToBig(new(big.Int), a)
+		bigB := uint128ToBig(new(big.Int), b)
+		bigA.Mul(bigA, bigB)
+		return bigToUint128(bigA)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestUint128_DivMod(t *testing.T) {
 	testCases := []struct {
 		a, b, div, mod Uint128
@@ -197,6 +288,29 @@ func TestUint128_DivMod(t *testing.T) {
 		if mod != tc.mod {
 			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
 		}
+	}
+}
+
+func TestInt128_DivModQuick(t *testing.T) {
+	f := func(a, b Uint128) (Uint128, Uint128) {
+		if b == (Uint128{0, 0}) {
+			return Uint128{0, 0}, Uint128{0, 0}
+		}
+		return a.DivMod(b)
+	}
+	g := func(a, b Uint128) (Uint128, Uint128) {
+		if b == (Uint128{0, 0}) {
+			return Uint128{0, 0}, Uint128{0, 0}
+		}
+		bigA := uint128ToBig(new(big.Int), a)
+		bigB := uint128ToBig(new(big.Int), b)
+		bigA.DivMod(bigA, bigB, bigB)
+		return bigToUint128(bigA), bigToUint128(bigB)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
 	}
 }
 
