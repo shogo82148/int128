@@ -305,7 +305,7 @@ func Float64ToInt128(v float64) Int128 {
 	if exp < 52 {
 		ret = ret.Rsh(uint(52 - exp))
 	} else {
-		// Uint128 cannot represent values greater or equal 1 << 128,
+		// Int128 cannot represent values greater or equal 1 << 128,
 		// however the spec says: https://golang.org/ref/spec#Conversions
 		// > if the result type cannot represent the value the conversion succeeds
 		// > but the result value is implementation-dependent.
