@@ -8,8 +8,12 @@ import (
 	"testing/quick"
 )
 
+// uint128Input is used for benchmarks to prevent compiler optimizations.
+var uint128Input = Uint128{0, 42}
+
 var bigModUint128, _ = new(big.Int).SetString("100000000000000000000000000000000", 16)
 
+// uint128ToBig converts x to a big.Int.
 func uint128ToBig(b *big.Int, x Uint128) *big.Int {
 	if b == nil {
 		b = new(big.Int)
@@ -35,6 +39,7 @@ func uint128ToBig(b *big.Int, x Uint128) *big.Int {
 	return b
 }
 
+// bigToUint128 converts x to a Uint128.
 func bigToUint128(x *big.Int) Uint128 {
 	var buf [16]byte
 	z := new(big.Int).Mod(x, bigModUint128)
@@ -87,10 +92,8 @@ func TestUint128_Add(t *testing.T) {
 }
 
 func BenchmarkUint128_Add(b *testing.B) {
-	x := Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
-	y := Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
 	for i := 0; i < b.N; i++ {
-		runtime.KeepAlive(x.Add(y))
+		runtime.KeepAlive(uint128Input.Add(uint128Input))
 	}
 }
 
@@ -149,10 +152,8 @@ func TestUint128_Sub(t *testing.T) {
 }
 
 func BenchmarkUint128_Sub(b *testing.B) {
-	x := Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
-	y := Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
 	for i := 0; i < b.N; i++ {
-		runtime.KeepAlive(x.Sub(y))
+		runtime.KeepAlive(uint128Input.Sub(uint128Input))
 	}
 }
 
@@ -247,6 +248,12 @@ func TestInt128_MulQuick(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_Mul(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Mul(uint128Input))
+	}
+}
+
 func TestUint128_DivMod(t *testing.T) {
 	testCases := []struct {
 		a, b, div, mod Uint128
@@ -311,6 +318,26 @@ func TestInt128_DivModQuick(t *testing.T) {
 		MaxCountScale: 1000,
 	}); err != nil {
 		t.Error(err)
+	}
+}
+
+func BenchmarkUint128_DivMod(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		div, mod := uint128Input.DivMod(uint128Input)
+		runtime.KeepAlive(div)
+		runtime.KeepAlive(mod)
+	}
+}
+
+func BenchmarkUint128_Div(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Div(uint128Input))
+	}
+}
+
+func BenchmarkUint128_Mod(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Mod(uint128Input))
 	}
 }
 
@@ -388,6 +415,12 @@ func TestUint128_And(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_And(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.And(uint128Input))
+	}
+}
+
 func TestUint128_Or(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
@@ -419,6 +452,12 @@ func TestUint128_Or(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: %#v | %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkUint128_Or(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Or(uint128Input))
 	}
 }
 
@@ -456,6 +495,12 @@ func TestUint128_Xor(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_Xor(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Xor(uint128Input))
+	}
+}
+
 func TestUint128_AndNot(t *testing.T) {
 	testCases := []struct {
 		a, b, want Uint128
@@ -490,6 +535,12 @@ func TestUint128_AndNot(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_AndNot(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.AndNot(uint128Input))
+	}
+}
+
 func TestUint128_Not(t *testing.T) {
 	testCases := []struct {
 		a, want Uint128
@@ -520,6 +571,12 @@ func TestUint128_Not(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_Not(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Not())
+	}
+}
+
 func TestUint128_Neg(t *testing.T) {
 	testCases := []struct {
 		a, want Uint128
@@ -543,6 +600,12 @@ func TestUint128_Neg(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: -%#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkUint128_Neg(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Neg())
 	}
 }
 
@@ -599,7 +662,7 @@ func TestUint128_Lsh(t *testing.T) {
 
 func BenchmarkUint128_Lsh(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		runtime.KeepAlive(Uint128Input.Lsh(uint(i) % 128))
+		runtime.KeepAlive(uint128Input.Lsh(uint(i) % 128))
 	}
 }
 
@@ -654,11 +717,9 @@ func TestUint128_Rsh(t *testing.T) {
 	}
 }
 
-var Uint128Input Uint128
-
 func BenchmarkUint128_Rsh(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		runtime.KeepAlive(Uint128Input.Rsh(uint(i) % 128))
+		runtime.KeepAlive(uint128Input.Rsh(uint(i) % 128))
 	}
 }
 
@@ -697,6 +758,12 @@ func TestUint128_LeadingZeros(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_LeadingZeros(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.LeadingZeros())
+	}
+}
+
 func TestUint128_TrailingZeros(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
@@ -732,6 +799,12 @@ func TestUint128_TrailingZeros(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_TrailingZeros(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.TrailingZeros())
+	}
+}
+
 func TestUint128_Len(t *testing.T) {
 	testCases := []struct {
 		a    Uint128
@@ -764,6 +837,12 @@ func TestUint128_Len(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: Len of %#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkUint128_Len(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Len())
 	}
 }
 
@@ -803,6 +882,12 @@ func TestUint128_OnesCount(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: OnesCount of %#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkUint128_OnesCount(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.OnesCount())
 	}
 }
 
@@ -877,6 +962,12 @@ func TestUint128_RotateLeft(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_RotateLeft(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.RotateLeft(i % 128))
+	}
+}
+
 func TestUint128_Reverse(t *testing.T) {
 	testCases := []struct {
 		a, want Uint128
@@ -903,6 +994,12 @@ func TestUint128_Reverse(t *testing.T) {
 	}
 }
 
+func BenchmarkUint128_Reverse(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.Reverse())
+	}
+}
+
 func TestUint128_ReverseBytes(t *testing.T) {
 	testCases := []struct {
 		a, want Uint128
@@ -926,6 +1023,12 @@ func TestUint128_ReverseBytes(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: %#v.Reverse() should %#v, but %#v", i, tc.a, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkUint128_ReverseBytes(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(uint128Input.ReverseBytes())
 	}
 }
 
@@ -977,6 +1080,12 @@ func TestFloat64ToUint128(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: Float64ToUint128(%f) should %#v, but %#v", i, tc.input, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkFloat64ToUint128(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(Float64ToUint128(float64(i)))
 	}
 }
 

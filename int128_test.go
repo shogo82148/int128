@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+// int128Input is used for benchmarks to prevent compiler optimizations.
+var int128Input = Int128{0, 42}
+
 func TestInt128_Add(t *testing.T) {
 	testCases := []struct {
 		a, b, want Int128
@@ -45,10 +48,8 @@ func TestInt128_Add(t *testing.T) {
 }
 
 func BenchmarkInt128_Add(b *testing.B) {
-	x := Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
-	y := Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
 	for i := 0; i < b.N; i++ {
-		runtime.KeepAlive(x.Add(y))
+		runtime.KeepAlive(int128Input.Add(int128Input))
 	}
 }
 
@@ -82,10 +83,8 @@ func TestInt128_Sub(t *testing.T) {
 }
 
 func BenchmarkInt128_Sub(b *testing.B) {
-	x := Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
-	y := Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0}
 	for i := 0; i < b.N; i++ {
-		runtime.KeepAlive(x.Sub(y))
+		runtime.KeepAlive(int128Input.Sub(int128Input))
 	}
 }
 
@@ -135,6 +134,12 @@ func TestInt128_Mul(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: %#v * %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkInt128_Mul(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Mul(int128Input))
 	}
 }
 
@@ -206,6 +211,26 @@ func TestInt128_DivMod(t *testing.T) {
 	}
 }
 
+func BenchmarkInt128_DivMod(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		div, mod := int128Input.DivMod(int128Input)
+		runtime.KeepAlive(div)
+		runtime.KeepAlive(mod)
+	}
+}
+
+func BenchmarkInt128_Div(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Div(int128Input))
+	}
+}
+
+func BenchmarkInt128_Mod(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Mod(int128Input))
+	}
+}
+
 func TestInt128_QuoRem(t *testing.T) {
 	testCases := []struct {
 		a, b, div, mod Int128
@@ -271,6 +296,26 @@ func TestInt128_QuoRem(t *testing.T) {
 		if mod != tc.mod {
 			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
 		}
+	}
+}
+
+func BenchmarkInt128_QuoRem(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		div, mod := int128Input.QuoRem(int128Input)
+		runtime.KeepAlive(div)
+		runtime.KeepAlive(mod)
+	}
+}
+
+func BenchmarkInt128_Quo(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Quo(int128Input))
+	}
+}
+
+func BenchmarkInt128_Rem(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Rem(int128Input))
 	}
 }
 
@@ -358,6 +403,12 @@ func TestInt128_And(t *testing.T) {
 	}
 }
 
+func BenchmarkInt128_And(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.And(int128Input))
+	}
+}
+
 func TestInt128_Or(t *testing.T) {
 	testCases := []struct {
 		a, b, want Int128
@@ -389,6 +440,12 @@ func TestInt128_Or(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: %#v | %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkInt128_Or(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Or(int128Input))
 	}
 }
 
@@ -426,6 +483,12 @@ func TestInt128_Xor(t *testing.T) {
 	}
 }
 
+func BenchmarkInt128_Xor(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Xor(int128Input))
+	}
+}
+
 func TestInt128_AndNot(t *testing.T) {
 	testCases := []struct {
 		a, b, want Int128
@@ -460,6 +523,12 @@ func TestInt128_AndNot(t *testing.T) {
 	}
 }
 
+func BenchmarkInt128_AndNot(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.AndNot(int128Input))
+	}
+}
+
 func TestInt128_Not(t *testing.T) {
 	testCases := []struct {
 		a, want Int128
@@ -490,6 +559,12 @@ func TestInt128_Not(t *testing.T) {
 	}
 }
 
+func BenchmarkInt128_Not(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Not())
+	}
+}
+
 func TestInt128_Neg(t *testing.T) {
 	testCases := []struct {
 		a, want Int128
@@ -513,6 +588,12 @@ func TestInt128_Neg(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: -%#v should %#v, but %#v", i, tc.a, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkInt128_Neg(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Neg())
 	}
 }
 
@@ -564,6 +645,12 @@ func TestInt128_Lsh(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: %#v << %d should %#v, but %#v", i, tc.a, tc.n, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkInt128_Lsh(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Lsh(uint(i) % 128))
 	}
 }
 
@@ -650,6 +737,12 @@ func TestInt128_Rsh(t *testing.T) {
 	}
 }
 
+func BenchmarkInt128_Rsh(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(int128Input.Rsh(uint(i) % 128))
+	}
+}
+
 func TestFloat64ToInt128(t *testing.T) {
 	testCases := []struct {
 		input float64
@@ -703,6 +796,12 @@ func TestFloat64ToInt128(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: Float64ToInt128(%f) should %#v, but %#v", i, tc.input, tc.want, got)
 		}
+	}
+}
+
+func BenchmarkFloat64ToInt128(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		runtime.KeepAlive(Float64ToInt128(float64(i)))
 	}
 }
 
