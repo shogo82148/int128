@@ -1,6 +1,7 @@
 package int128
 
 import (
+	"math"
 	"math/big"
 	"runtime"
 	"strconv"
@@ -621,6 +622,11 @@ func TestUint128_Lsh(t *testing.T) {
 			Uint128{0, 0},
 		},
 		{
+			Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0},
+			0,
+			Uint128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0},
+		},
+		{
 			Uint128{0, 0xffff_ffff_ffff_ffff},
 			1,
 			Uint128{0x01, 0xffff_ffff_ffff_fffe},
@@ -648,6 +654,11 @@ func TestUint128_Lsh(t *testing.T) {
 		{
 			Uint128{0, 0xffff_ffff_ffff_ffff},
 			128,
+			Uint128{0, 0},
+		},
+		{
+			Uint128{0xffff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
+			math.MaxUint,
 			Uint128{0, 0},
 		},
 	}
