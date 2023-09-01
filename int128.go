@@ -261,8 +261,8 @@ func (a Int128) Not() Int128 {
 //
 // This function's execution time does not depend on the inputs.
 func (a Int128) Neg() Int128 {
-	l, carry := bits.Add64(^a.L, 1, 0)
-	h, _ := bits.Add64(uint64(^a.H), 0, carry)
+	l, borrow := bits.Sub64(0, a.L, 0)
+	h, _ := bits.Sub64(0, uint64(a.H), borrow)
 	return Int128{int64(h), l}
 }
 
