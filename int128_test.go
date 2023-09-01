@@ -1,12 +1,65 @@
 package int128
 
 import (
+	"math/big"
 	"runtime"
 	"testing"
+	"testing/quick"
 )
 
 // int128Input is used for benchmarks to prevent compiler optimizations.
 var int128Input = Int128{0, 42}
+
+// int128ToBig converts x to a big.Int.
+func int128ToBig(b *big.Int, x Int128) *big.Int {
+	if b == nil {
+		b = new(big.Int)
+	}
+	var neg bool
+	if x.H < 0 {
+		neg = true
+		x = x.Neg()
+	}
+	b.SetBytes([]byte{
+		byte(x.H >> 56),
+		byte(x.H >> 48),
+		byte(x.H >> 40),
+		byte(x.H >> 32),
+		byte(x.H >> 24),
+		byte(x.H >> 16),
+		byte(x.H >> 8),
+		byte(x.H),
+		byte(x.L >> 56),
+		byte(x.L >> 48),
+		byte(x.L >> 40),
+		byte(x.L >> 32),
+		byte(x.L >> 24),
+		byte(x.L >> 16),
+		byte(x.L >> 8),
+		byte(x.L),
+	})
+	if neg {
+		b = b.Neg(b)
+	}
+	return b
+}
+
+// bigToInt128 converts x to a Uint128.
+func bigToInt128(x *big.Int) Int128 {
+	var buf [16]byte
+	z := new(big.Int).Mod(x, bigModUint128)
+	z.FillBytes(buf[:])
+	ret := Int128{
+		H: (int64(buf[0]) << 56) | (int64(buf[1]) << 48) | (int64(buf[2]) << 40) | (int64(buf[3]) << 32) |
+			(int64(buf[4]) << 24) | (int64(buf[5]) << 16) | (int64(buf[6]) << 8) | int64(buf[7]),
+		L: (uint64(buf[8]) << 56) | (uint64(buf[9]) << 48) | (uint64(buf[10]) << 40) | (uint64(buf[11]) << 32) |
+			(uint64(buf[12]) << 24) | (uint64(buf[13]) << 16) | (uint64(buf[14]) << 8) | uint64(buf[15]),
+	}
+	if z.Sign() < 0 {
+		ret = ret.Neg()
+	}
+	return ret
+}
 
 func TestInt128_Add(t *testing.T) {
 	testCases := []struct {
@@ -47,6 +100,23 @@ func TestInt128_Add(t *testing.T) {
 	}
 }
 
+func TestInt128_AddQuick(t *testing.T) {
+	f := func(a, b Int128) Int128 {
+		return a.Add(b)
+	}
+	g := func(a, b Int128) Int128 {
+		bigA := int128ToBig(new(big.Int), a)
+		bigB := int128ToBig(new(big.Int), b)
+		bigA.Add(bigA, bigB)
+		return bigToInt128(bigA)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
+	}
+}
+
 func BenchmarkInt128_Add(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		runtime.KeepAlive(int128Input.Add(int128Input))
@@ -82,6 +152,23 @@ func TestInt128_Sub(t *testing.T) {
 	}
 }
 
+func TestInt128_SubQuick(t *testing.T) {
+	f := func(a, b Int128) Int128 {
+		return a.Sub(b)
+	}
+	g := func(a, b Int128) Int128 {
+		bigA := int128ToBig(new(big.Int), a)
+		bigB := int128ToBig(new(big.Int), b)
+		bigA.Sub(bigA, bigB)
+		return bigToInt128(bigA)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
+	}
+}
+
 func BenchmarkInt128_Sub(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		runtime.KeepAlive(int128Input.Sub(int128Input))
@@ -113,16 +200,19 @@ func TestInt128_Mul(t *testing.T) {
 			Int128{1, 0},
 		},
 		{
+			// -1 * -1 = 1
 			Int128{-1, 0xffff_ffff_ffff_ffff},
 			Int128{-1, 0xffff_ffff_ffff_ffff},
 			Int128{0, 1},
 		},
 		{
+			// -1 * 1 = -1
 			Int128{-1, 0xffff_ffff_ffff_ffff},
 			Int128{0, 1},
 			Int128{-1, 0xffff_ffff_ffff_ffff},
 		},
 		{
+			// -1 * 1<<64 = -1<<64
 			Int128{-1, 0xffff_ffff_ffff_ffff},
 			Int128{1, 0},
 			Int128{-1, 0},
@@ -134,6 +224,23 @@ func TestInt128_Mul(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("%d: %#v * %#v should %#v, but %#v", i, tc.a, tc.b, tc.want, got)
 		}
+	}
+}
+
+func TestInt128_MulQuick(t *testing.T) {
+	f := func(a, b Int128) Int128 {
+		return a.Mul(b)
+	}
+	g := func(a, b Int128) Int128 {
+		bigA := int128ToBig(new(big.Int), a)
+		bigB := int128ToBig(new(big.Int), b)
+		bigA.Mul(bigA, bigB)
+		return bigToInt128(bigA)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -208,6 +315,29 @@ func TestInt128_DivMod(t *testing.T) {
 		if mod != tc.mod {
 			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
 		}
+	}
+}
+
+func TestInt128_DivModQuick(t *testing.T) {
+	f := func(a, b Int128) (Int128, Int128) {
+		if b == (Int128{0, 0}) {
+			return Int128{0, 0}, Int128{0, 0}
+		}
+		return a.DivMod(b)
+	}
+	g := func(a, b Int128) (Int128, Int128) {
+		if b == (Int128{0, 0}) {
+			return Int128{0, 0}, Int128{0, 0}
+		}
+		bigA := int128ToBig(new(big.Int), a)
+		bigB := int128ToBig(new(big.Int), b)
+		div, mod := new(big.Int).DivMod(bigA, bigB, new(big.Int))
+		return bigToInt128(div), bigToInt128(mod)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -296,6 +426,29 @@ func TestInt128_QuoRem(t *testing.T) {
 		if mod != tc.mod {
 			t.Errorf("%d: %#v %% %#v should %#v, but %#v", i, tc.a, tc.b, tc.mod, mod)
 		}
+	}
+}
+
+func TestInt128_QuoRemQuick(t *testing.T) {
+	f := func(a, b Int128) (Int128, Int128) {
+		if b == (Int128{0, 0}) {
+			return Int128{0, 0}, Int128{0, 0}
+		}
+		return a.QuoRem(b)
+	}
+	g := func(a, b Int128) (Int128, Int128) {
+		if b == (Int128{0, 0}) {
+			return Int128{0, 0}, Int128{0, 0}
+		}
+		bigA := int128ToBig(new(big.Int), a)
+		bigB := int128ToBig(new(big.Int), b)
+		quo, rem := new(big.Int).QuoRem(bigA, bigB, new(big.Int))
+		return bigToInt128(quo), bigToInt128(rem)
+	}
+	if err := quick.CheckEqual(f, g, &quick.Config{
+		MaxCountScale: 1000,
+	}); err != nil {
+		t.Error(err)
 	}
 }
 

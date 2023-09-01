@@ -105,7 +105,7 @@ func BenchmarkBigUint128_Add(b *testing.B) {
 	}
 }
 
-func TestInt128_AddQuick(t *testing.T) {
+func TestUint128_AddQuick(t *testing.T) {
 	f := func(a, b Uint128) Uint128 {
 		return a.Add(b)
 	}
@@ -165,7 +165,7 @@ func BenchmarkBigUint128_Sub(b *testing.B) {
 	}
 }
 
-func TestInt128_SubQuick(t *testing.T) {
+func TestUint128_SubQuick(t *testing.T) {
 	f := func(a, b Uint128) Uint128 {
 		return a.Sub(b)
 	}
@@ -231,7 +231,7 @@ func TestUint128_Mul(t *testing.T) {
 	}
 }
 
-func TestInt128_MulQuick(t *testing.T) {
+func TestUint128_MulQuick(t *testing.T) {
 	f := func(a, b Uint128) Uint128 {
 		return a.Mul(b)
 	}
@@ -298,7 +298,7 @@ func TestUint128_DivMod(t *testing.T) {
 	}
 }
 
-func TestInt128_DivModQuick(t *testing.T) {
+func TestUint128_DivModQuick(t *testing.T) {
 	f := func(a, b Uint128) (Uint128, Uint128) {
 		if b == (Uint128{0, 0}) {
 			return Uint128{0, 0}, Uint128{0, 0}
@@ -311,8 +311,8 @@ func TestInt128_DivModQuick(t *testing.T) {
 		}
 		bigA := uint128ToBig(new(big.Int), a)
 		bigB := uint128ToBig(new(big.Int), b)
-		bigA.DivMod(bigA, bigB, bigB)
-		return bigToUint128(bigA), bigToUint128(bigB)
+		div, mod := new(big.Int).DivMod(bigA, bigB, new(big.Int))
+		return bigToUint128(div), bigToUint128(mod)
 	}
 	if err := quick.CheckEqual(f, g, &quick.Config{
 		MaxCountScale: 1000,
