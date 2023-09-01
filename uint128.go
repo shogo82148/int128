@@ -222,22 +222,26 @@ func (a Uint128) Neg() Uint128 {
 //
 // This function's execution time does not depend on the inputs.
 func (a Uint128) Lsh(i uint) Uint128 {
-	n, v := bits.Sub(i, 64, 0)
-	m := ^n + 1
+	// This operation may overflow, but it's okay because when it overflows,
+	// the result is always greater than or equal to 64.
+	// And shifts of 64 bits or more always result in 0, so they don't affect the final result.
+	n := uint(i - 64)
+	m := uint(64 - i)
 
-	mask := uint64(int(v) - 1)
-	return Uint128{a.H<<i | (mask & (a.L << n)) | (^mask & (a.L >> m)), a.L << i}
+	return Uint128{a.H<<i | a.L<<n | a.L>>m, a.L << i}
 }
 
 // Rsh returns the logical right shift a>>i.
 //
 // This function's execution time does not depend on the inputs.
 func (a Uint128) Rsh(i uint) Uint128 {
-	n, v := bits.Sub(i, 64, 0)
-	m := ^n + 1
+	// This operation may overflow, but it's okay because when it overflows,
+	// the result is always greater than or equal to 64.
+	// And shifts of 64 bits or more always result in 0, so they don't affect the final result.
+	n := uint(i - 64)
+	m := uint(64 - i)
 
-	mask := uint64(int(v) - 1)
-	return Uint128{a.H >> i, mask&(a.H>>n) | ^mask&(a.H<<m) | a.L>>i}
+	return Uint128{a.H >> i, a.H>>n | a.H<<m | a.L>>i}
 }
 
 // LeadingZeros returns the number of leading zero bits in a; the result is 128 for a == 0.
@@ -270,15 +274,14 @@ func (a Uint128) OnesCount() int {
 }
 
 // RotateLeft returns the value of a rotated left by (k mod 128) bits.
+//
+// This function's execution time does not depend on the inputs.
 func (a Uint128) RotateLeft(k int) Uint128 {
 	const n = 128
 	s := uint(k) & (n - 1)
 	t := n - s
-	if s < 64 {
-		return Uint128{a.H<<s | a.L>>(64-s), a.L<<s | a.H>>(t-64)}
-	} else {
-		return Uint128{a.L<<(s-64) | a.H>>t, a.H<<(64-t) | a.L>>t}
-	}
+
+	return Uint128{a.H<<s | a.L<<(s-64) | a.L>>(64-s) | a.H>>t, a.L<<s | a.H>>(t-64) | a.H<<(64-t) | a.L>>t}
 }
 
 // Reverse returns the value of a with its bits in reversed order.

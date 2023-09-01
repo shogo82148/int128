@@ -1,6 +1,7 @@
 package int128
 
 import (
+	"math"
 	"math/big"
 	"runtime"
 	"testing"
@@ -762,6 +763,11 @@ func TestInt128_Lsh(t *testing.T) {
 			Int128{0, 0},
 		},
 		{
+			Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0},
+			0,
+			Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0},
+		},
+		{
 			Int128{0, 0xffff_ffff_ffff_ffff},
 			1,
 			Int128{0x01, 0xffff_ffff_ffff_fffe},
@@ -789,6 +795,11 @@ func TestInt128_Lsh(t *testing.T) {
 		{
 			Int128{0, 0xffff_ffff_ffff_ffff},
 			128,
+			Int128{0, 0},
+		},
+		{
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+			math.MaxUint,
 			Int128{0, 0},
 		},
 	}
@@ -819,6 +830,11 @@ func TestInt128_Rsh(t *testing.T) {
 			Int128{0, 0},
 		},
 		{
+			Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0},
+			0,
+			Int128{0x1234_5678_9abc_def0, 0x1234_5678_9abc_def0},
+		},
+		{
 			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
 			1,
 			Int128{0x3fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
@@ -846,6 +862,11 @@ func TestInt128_Rsh(t *testing.T) {
 		{
 			Int128{0x7fff_ffff_ffff_ffff, 0},
 			128,
+			Int128{0, 0},
+		},
+		{
+			Int128{0x7fff_ffff_ffff_ffff, 0},
+			math.MaxUint,
 			Int128{0, 0},
 		},
 
@@ -878,6 +899,11 @@ func TestInt128_Rsh(t *testing.T) {
 		{
 			Int128{-1, 0},
 			128,
+			Int128{-1, 0xffff_ffff_ffff_ffff},
+		},
+		{
+			Int128{-1, 0},
+			math.MaxUint,
 			Int128{-1, 0xffff_ffff_ffff_ffff},
 		},
 	}
