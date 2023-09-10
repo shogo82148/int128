@@ -300,13 +300,21 @@ func TestUint128_DivMod(t *testing.T) {
 }
 
 func TestUint128_DivModQuick(t *testing.T) {
-	f := func(a, b Uint128) (Uint128, Uint128) {
+	f := func(l uint, a, b Uint128) (Uint128, Uint128) {
+		a.H |= 1 << 63
+		b.H |= 1 << 63
+		a = a.Rsh(l % 128)
+		b = b.Rsh(l % 128)
 		if b == (Uint128{0, 0}) {
 			return Uint128{0, 0}, Uint128{0, 0}
 		}
 		return a.DivMod(b)
 	}
-	g := func(a, b Uint128) (Uint128, Uint128) {
+	g := func(l uint, a, b Uint128) (Uint128, Uint128) {
+		a.H |= 1 << 63
+		b.H |= 1 << 63
+		a = a.Rsh(l % 128)
+		b = b.Rsh(l % 128)
 		if b == (Uint128{0, 0}) {
 			return Uint128{0, 0}, Uint128{0, 0}
 		}
@@ -316,7 +324,7 @@ func TestUint128_DivModQuick(t *testing.T) {
 		return bigToUint128(div), bigToUint128(mod)
 	}
 	if err := quick.CheckEqual(f, g, &quick.Config{
-		MaxCountScale: 1000,
+		MaxCountScale: 10000,
 	}); err != nil {
 		t.Error(err)
 	}
