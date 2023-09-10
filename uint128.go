@@ -97,8 +97,6 @@ func (a Uint128) Mod(b Uint128) Uint128 {
 // DivMod returns the quotient and remainder of a/b for b != 0.
 // If b == 0, a division-by-zero run-time panic occurs.
 //
-// DivMod implements Euclidean division and modulus (unlike Go):
-//
 //	q = a div b  such that
 //	m = a - b*q  with 0 <= m < |y|
 func (a Uint128) DivMod(b Uint128) (Uint128, Uint128) {
@@ -144,8 +142,6 @@ func (a Uint128) Rem(b Uint128) Uint128 {
 
 // QuoRem returns the quotient a/b and the remainder a%b for b != 0.
 // a division-by-zero run-time panic occurs.
-//
-// QuoRem implements T-division and modulus (like Go):
 //
 //	q = a/b      with the result truncated to zero
 //	r = a - b*q
