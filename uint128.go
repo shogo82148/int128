@@ -34,8 +34,9 @@ func (a Uint128) Sub(b Uint128) Uint128 {
 // This function's execution time does not depend on the inputs.
 func (a Uint128) Mul(b Uint128) Uint128 {
 	h, l := bits.Mul64(a.L, b.L)
-	h1 := a.H * b.L
-	h2 := a.L * b.H
+	// they are same as a.H * b.L, but use bits.Mul64 for avoiding compiler optimization
+	_, h1 := bits.Mul64(a.H, b.L)
+	_, h2 := bits.Mul64(a.L, b.H)
 	return Uint128{h + h1 + h2, l}
 }
 
