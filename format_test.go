@@ -43,6 +43,9 @@ func TestInt128Format(t *testing.T) {
 
 		{"%X", Int128{0, 0xabcd}, "ABCD"},
 		{"%#X", Int128{0, 0xabcd}, "0XABCD"},
+
+		{"%v", Int128{0, 0}, "0"},
+		{"%#v", Int128{0, 0}, "Int128{H: 0x0000000000000000, L: 0x0000000000000000}"},
 	}
 
 	for _, tt := range tests {
@@ -87,6 +90,9 @@ func TestUint128Format(t *testing.T) {
 
 		{"%X", Uint128{0, 0xabcd}, "ABCD"},
 		{"%#X", Uint128{0, 0xabcd}, "0XABCD"},
+
+		{"%v", Uint128{0, 0}, "0"},
+		{"%#v", Uint128{0, 0}, "Uint128{H: 0x0000000000000000, L: 0x0000000000000000}"},
 	}
 
 	for _, tt := range tests {

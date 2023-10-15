@@ -64,7 +64,13 @@ func (a Int128) Format(s fmt.State, ch rune) {
 			prefix = append(prefix, '0', 'X')
 		}
 	case 'v':
-		out = a.Append(out, 10)
+		if s.Flag('#') {
+			fmt.Fprintf(s, "Int128{H: %#016x, L: %#016x}", a.H, a.L)
+		} else {
+			out = a.Append(out, 10)
+			s.Write(out)
+		}
+		return
 	}
 
 	if w, ok := s.Width(); ok {
@@ -155,7 +161,13 @@ func (a Uint128) Format(s fmt.State, ch rune) {
 			prefix = append(prefix, '0', 'X')
 		}
 	case 'v':
-		out = a.Append(out, 10)
+		if s.Flag('#') {
+			fmt.Fprintf(s, "Uint128{H: %#016x, L: %#016x}", a.H, a.L)
+		} else {
+			out = a.Append(out, 10)
+			s.Write(out)
+		}
+		return
 	}
 
 	if w, ok := s.Width(); ok {

@@ -1175,6 +1175,10 @@ func TestInt128_String(t *testing.T) {
 			"18446744073709551615",
 		},
 		{
+			Int128{0x4b3b4ca85a86c47a, 0x098a_2240_0000_0000},
+			"100000000000000000000000000000000000000",
+		},
+		{
 			// the max value of Int128
 			Int128{0x7fff_ffff_ffff_ffff, 0xffff_ffff_ffff_ffff},
 			"170141183460469231731687303715884105727",
