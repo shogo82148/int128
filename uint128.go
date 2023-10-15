@@ -398,7 +398,7 @@ func formatUint128(dst []byte, h, l uint64, base int, neg bool, append_ bool) ([
 			var r uint64
 			l, r = bits.Div64(h%1e18, l, 1e18)
 			h /= 1e18
-			for r > 0 {
+			for j := 0; j < 9; j++ {
 				is := (r % 100) * 2
 				r /= 100
 				i -= 2
