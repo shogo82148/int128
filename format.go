@@ -47,12 +47,16 @@ func (a Uint128) Format(s fmt.State, ch rune) {
 		if s.Flag('#') {
 			prefix = append(prefix, '0', 'X')
 		}
+	case 'v':
+		out = a.Append(out, 10)
 	}
 
 	if w, ok := s.Width(); ok {
 		var buf [8]byte
 		if s.Flag('0') {
-			s.Write(prefix)
+			if len(prefix) > 0 {
+				s.Write(prefix)
+			}
 
 			// pad with zeros
 			buf[0] = '0'
@@ -61,7 +65,9 @@ func (a Uint128) Format(s fmt.State, ch rune) {
 			}
 			s.Write(out)
 		} else if s.Flag('-') {
-			s.Write(prefix)
+			if len(prefix) > 0 {
+				s.Write(prefix)
+			}
 			s.Write(out)
 
 			// pad with spaces
@@ -81,6 +87,8 @@ func (a Uint128) Format(s fmt.State, ch rune) {
 		return
 	}
 
-	s.Write(prefix)
+	if len(prefix) > 0 {
+		s.Write(prefix)
+	}
 	s.Write(out)
 }
