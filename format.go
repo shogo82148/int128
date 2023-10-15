@@ -7,6 +7,7 @@ import (
 
 var _ fmt.Formatter = Int128{}
 
+// Format implements [fmt.Formatter].
 func (a Int128) Format(s fmt.State, ch rune) {
 	var out []byte
 	var prefix []byte
@@ -112,6 +113,7 @@ func (a Int128) Format(s fmt.State, ch rune) {
 
 var _ fmt.Formatter = Uint128{}
 
+// Format implements [fmt.Formatter].
 func (a Uint128) Format(s fmt.State, ch rune) {
 	var out []byte
 	var prefix []byte
