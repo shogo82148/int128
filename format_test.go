@@ -47,6 +47,7 @@ func TestInt128Format(t *testing.T) {
 		{"%v", Int128{0, 0}, "0"},
 		{"%v", Int128{0, 1}.Neg(), "-1"},
 		{"%#v", Int128{0, 0}, "Int128{H: 0x0000000000000000, L: 0x0000000000000000}"},
+		{"%#v", Int128{0, 1}.Neg(), "Int128{H: -0x000000000000001, L: 0xffffffffffffffff}"},
 	}
 
 	for _, tt := range tests {
