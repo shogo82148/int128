@@ -8,9 +8,19 @@ import (
 var _ fmt.Formatter = Int128{}
 
 // Format implements [fmt.Formatter].
-func (a Int128) Format(s fmt.State, ch rune) {
+func (a Int128) Format(s fmt.State, verb rune) {
 	var out []byte
 	var prefix []byte
+
+	if verb == 'v' {
+		if s.Flag('#') {
+			fmt.Fprintf(s, "Int128{H: %#016x, L: %#016x}", a.H, a.L)
+		} else {
+			out = a.Append(out, 10)
+			s.Write(out)
+		}
+		return
+	}
 
 	if s.Flag('+') {
 		if a.H >= 0 {
@@ -33,7 +43,7 @@ func (a Int128) Format(s fmt.State, ch rune) {
 		}
 	}
 
-	switch ch {
+	switch verb {
 	case 'b':
 		out = a.Append(out, 2)
 		if s.Flag('#') {
@@ -63,14 +73,6 @@ func (a Int128) Format(s fmt.State, ch rune) {
 		if s.Flag('#') {
 			prefix = append(prefix, '0', 'X')
 		}
-	case 'v':
-		if s.Flag('#') {
-			fmt.Fprintf(s, "Int128{H: %#016x, L: %#016x}", a.H, a.L)
-		} else {
-			out = a.Append(out, 10)
-			s.Write(out)
-		}
-		return
 	}
 
 	if w, ok := s.Width(); ok {
