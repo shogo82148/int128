@@ -1,3 +1,7 @@
+# ARCHIVED!
+
+use https://github.com/shogo82148/ints instead of this package.
+
 # int128
 
 [![test](https://github.com/shogo82148/int128/actions/workflows/test.yml/badge.svg)](https://github.com/shogo82148/int128/actions/workflows/test.yml)
